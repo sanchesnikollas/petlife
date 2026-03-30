@@ -37,12 +37,15 @@ export default function Health() {
   const [dewormingForm, setDewormingForm] = useState(initialDewormingForm);
   const [medicationForm, setMedicationForm] = useState(initialMedicationForm);
   const [consultationForm, setConsultationForm] = useState(initialConsultationForm);
+  const [formErrors, setFormErrors] = useState({});
 
   const formatDate = (d) => format(parseISO(d), "dd 'de' MMM, yyyy", { locale: ptBR });
+  const inputCls = (errKey) => `w-full px-3 py-2.5 bg-surface border rounded-xl text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${formErrors[errKey] ? 'border-danger ring-2 ring-danger/20' : 'border-gray-200'}`;
 
-  const openModal = () => setShowModal(true);
+  const openModal = () => { setShowModal(true); setFormErrors({}); };
   const closeModal = () => {
     setShowModal(false);
+    setFormErrors({});
     setVaccineForm(initialVaccineForm);
     setDewormingForm(initialDewormingForm);
     setMedicationForm(initialMedicationForm);
@@ -50,7 +53,13 @@ export default function Health() {
   };
 
   const handleAddVaccine = () => {
-    if (!vaccineForm.name || !vaccineForm.lastDone || !vaccineForm.nextDue) return;
+    const errs = {};
+    if (!vaccineForm.name) errs.vName = true;
+    if (!vaccineForm.lastDone) errs.vLastDone = true;
+    if (!vaccineForm.nextDue) errs.vNextDue = true;
+    if (vaccineForm.lastDone && vaccineForm.nextDue && vaccineForm.lastDone > vaccineForm.nextDue) errs.vDateOrder = true;
+    if (Object.keys(errs).length) { setFormErrors(errs); return; }
+    setFormErrors({});
     addVaccine({
       name: vaccineForm.name,
       lastDone: vaccineForm.lastDone,
@@ -63,7 +72,12 @@ export default function Health() {
   };
 
   const handleAddDeworming = () => {
-    if (!dewormingForm.name || !dewormingForm.lastDone || !dewormingForm.nextDue) return;
+    const errs = {};
+    if (!dewormingForm.name) errs.dName = true;
+    if (!dewormingForm.lastDone) errs.dLastDone = true;
+    if (!dewormingForm.nextDue) errs.dNextDue = true;
+    if (Object.keys(errs).length) { setFormErrors(errs); return; }
+    setFormErrors({});
     addDeworming({
       name: dewormingForm.name,
       product: dewormingForm.product,
@@ -75,7 +89,13 @@ export default function Health() {
   };
 
   const handleAddMedication = () => {
-    if (!medicationForm.name || !medicationForm.dose || !medicationForm.frequency || !medicationForm.duration) return;
+    const errs = {};
+    if (!medicationForm.name) errs.mName = true;
+    if (!medicationForm.dose) errs.mDose = true;
+    if (!medicationForm.frequency) errs.mFreq = true;
+    if (!medicationForm.duration || Number(medicationForm.duration) <= 0) errs.mDuration = true;
+    if (Object.keys(errs).length) { setFormErrors(errs); return; }
+    setFormErrors({});
     addMedication({
       name: medicationForm.name,
       dose: medicationForm.dose,
@@ -90,7 +110,11 @@ export default function Health() {
   };
 
   const handleAddConsultation = () => {
-    if (!consultationForm.date || !consultationForm.type) return;
+    const errs = {};
+    if (!consultationForm.date) errs.cDate = true;
+    if (!consultationForm.type) errs.cType = true;
+    if (Object.keys(errs).length) { setFormErrors(errs); return; }
+    setFormErrors({});
     addConsultation({
       date: consultationForm.date,
       type: consultationForm.type,
@@ -332,33 +356,37 @@ export default function Health() {
       <Modal open={showModal && activeTab === 'vaccines'} onClose={closeModal} title={modalTitles.vaccines}>
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-text-secondary mb-1">Nome da vacina</label>
+            <label className="block text-xs font-semibold text-text-secondary mb-1">Nome da vacina *</label>
             <input
               type="text"
               value={vaccineForm.name}
-              onChange={(e) => setVaccineForm({ ...vaccineForm, name: e.target.value })}
-              className="w-full px-3 py-2.5 bg-surface border border-gray-200 rounded-xl text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              onChange={(e) => { setVaccineForm({ ...vaccineForm, name: e.target.value }); setFormErrors((p) => ({ ...p, vName: false })); }}
+              className={inputCls('vName')}
               placeholder="Ex: V10"
             />
+            {formErrors.vName && <p className="text-xs text-danger mt-1">Obrigatório</p>}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-text-secondary mb-1">Aplicação</label>
+              <label className="block text-xs font-semibold text-text-secondary mb-1">Aplicação *</label>
               <input
                 type="date"
                 value={vaccineForm.lastDone}
-                onChange={(e) => setVaccineForm({ ...vaccineForm, lastDone: e.target.value })}
-                className="w-full px-3 py-2.5 bg-surface border border-gray-200 rounded-xl text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                onChange={(e) => { setVaccineForm({ ...vaccineForm, lastDone: e.target.value }); setFormErrors((p) => ({ ...p, vLastDone: false, vDateOrder: false })); }}
+                className={inputCls('vLastDone')}
               />
+              {formErrors.vLastDone && <p className="text-xs text-danger mt-1">Obrigatório</p>}
             </div>
             <div>
-              <label className="block text-xs font-semibold text-text-secondary mb-1">Reforço</label>
+              <label className="block text-xs font-semibold text-text-secondary mb-1">Reforço *</label>
               <input
                 type="date"
                 value={vaccineForm.nextDue}
-                onChange={(e) => setVaccineForm({ ...vaccineForm, nextDue: e.target.value })}
-                className="w-full px-3 py-2.5 bg-surface border border-gray-200 rounded-xl text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                onChange={(e) => { setVaccineForm({ ...vaccineForm, nextDue: e.target.value }); setFormErrors((p) => ({ ...p, vNextDue: false, vDateOrder: false })); }}
+                className={inputCls('vNextDue')}
               />
+              {formErrors.vNextDue && <p className="text-xs text-danger mt-1">Obrigatório</p>}
+              {formErrors.vDateOrder && <p className="text-xs text-danger mt-1">Reforço deve ser após aplicação</p>}
             </div>
           </div>
           <div>

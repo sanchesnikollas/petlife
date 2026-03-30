@@ -1,7 +1,6 @@
 import { usePet } from '../context/PetContext';
 import { Dog, Cat, AlertTriangle, CheckCircle2, Sparkles } from 'lucide-react';
 import { differenceInYears, differenceInMonths, parseISO } from 'date-fns';
-import PetSwitcher from './PetSwitcher';
 
 function getAge(birthDate) {
   if (!birthDate) return '';
@@ -21,20 +20,13 @@ function getGreeting() {
 }
 
 export default function PetHeader() {
-  const { pet, pets } = usePet();
+  const { pet } = usePet();
   const hasOverdue = pet.vaccines.some((v) => v.status === 'overdue');
   const age = getAge(pet.birthDate);
   const greeting = getGreeting();
 
   return (
-    <div className="pt-6 pb-4 animate-fade-in-up">
-      {/* Pet Switcher (only if 2+ pets) */}
-      {pets.length > 1 && (
-        <div className="mb-4">
-          <PetSwitcher />
-        </div>
-      )}
-
+    <div className="pt-2 pb-4 animate-fade-in-up">
       {/* Greeting */}
       <div className="flex items-center gap-1.5 mb-3">
         <Sparkles size={14} className="text-accent" />

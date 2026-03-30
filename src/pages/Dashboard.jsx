@@ -36,7 +36,7 @@ function formatDateShort(dateStr) {
 }
 
 export default function Dashboard() {
-  const { pet, addVaccine, addMedication, addWeightEntry, addRecord } = usePet();
+  const { pet, addVaccine, addMedication, addWeightEntry, addRecord, showToast } = usePet();
   const [modal, setModal] = useState(null);
   const [formData, setFormData] = useState({});
   const [expandedEvent, setExpandedEvent] = useState(null);
@@ -201,7 +201,7 @@ export default function Dashboard() {
   };
 
   const handleFileUploadClick = () => {
-    alert('Funcionalidade de upload de arquivos sera implementada em breve. Por enquanto, registre as informacoes do exame nos campos acima.');
+    showToast('Upload de arquivos estará disponível em breve. Registre as informações nos campos acima.', 'error');
   };
 
   const btnBase = 'w-full py-3 rounded-full font-semibold text-sm transition-all duration-200';

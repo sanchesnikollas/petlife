@@ -77,11 +77,12 @@ export default function Onboarding() {
       if (!form.name.trim()) newErrors.name = true;
       if (!form.breed.trim()) newErrors.breed = true;
       if (!form.birthDate) newErrors.birthDate = true;
+      else if (new Date(form.birthDate) > new Date()) newErrors.birthDate = 'future';
     } else if (step === 1) {
-      if (!form.weight) newErrors.weight = true;
+      if (!form.weight || parseFloat(form.weight) <= 0) newErrors.weight = true;
     } else if (step === 2) {
       if (!form.foodBrand.trim()) newErrors.foodBrand = true;
-      if (!form.portionGrams) newErrors.portionGrams = true;
+      if (!form.portionGrams || parseInt(form.portionGrams) <= 0) newErrors.portionGrams = true;
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -232,7 +233,7 @@ export default function Onboarding() {
                 value={form.birthDate}
                 onChange={(e) => set('birthDate', e.target.value)}
               />
-              {errors.birthDate && <p className="text-xs text-danger mt-1">Obrigatório</p>}
+              {errors.birthDate && <p className="text-xs text-danger mt-1">{errors.birthDate === 'future' ? 'Data não pode ser no futuro' : 'Obrigatório'}</p>}
             </div>
             <div>
               <label className="block text-xs font-semibold text-text-secondary mb-1.5">Sexo</label>
@@ -264,7 +265,7 @@ export default function Onboarding() {
               onChange={(e) => set('weight', e.target.value)}
               autoFocus
             />
-            {errors.weight && <p className="text-xs text-danger mt-1">Informe o peso</p>}
+            {errors.weight && <p className="text-xs text-danger mt-1">Informe um peso válido (maior que 0)</p>}
           </div>
 
           <div>

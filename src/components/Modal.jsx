@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 export default function Modal({ open, onClose, title, children }) {
@@ -35,7 +36,7 @@ export default function Modal({ open, onClose, title, children }) {
 
   if (!visible) return null;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[999] flex items-end sm:items-center justify-center"
       onClick={handleBackdropClick}
@@ -81,6 +82,7 @@ export default function Modal({ open, onClose, title, children }) {
         {/* Safe area spacer */}
         <div style={{ height: 'env(safe-area-inset-bottom, 0px)' }} />
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

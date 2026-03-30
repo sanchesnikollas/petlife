@@ -184,15 +184,15 @@ export function PetProvider({ children }) {
   const removePet = useCallback((petId) => {
     setPets((prev) => {
       const next = prev.filter((p) => p.id !== petId);
-      if (next.length === 0) return prev; // don't allow removing the last pet
+      if (next.length === 0) return prev;
+      // If removing active pet, switch to first remaining
+      if (petId === activePetId) {
+        setActivePetId(next[0].id);
+      }
       return next;
     });
-    if (activePetId === petId) {
-      const remaining = pets.filter((p) => p.id !== petId);
-      if (remaining.length > 0) setActivePetId(remaining[0].id);
-    }
     showToast('Pet removido.');
-  }, [activePetId, pets, showToast]);
+  }, [activePetId, showToast]);
 
   const login = useCallback((userData) => {
     if (userData?.name) {

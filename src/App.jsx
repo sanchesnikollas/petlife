@@ -7,6 +7,7 @@ import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import Health from './pages/Health';
 import Food from './pages/Food';
+import Community from './pages/Community';
 import Records from './pages/Records';
 import Settings from './pages/Settings';
 
@@ -53,6 +54,7 @@ function AppRoutes() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/health" element={<Health />} />
         <Route path="/food" element={<Food />} />
+        <Route path="/community" element={<Community />} />
         <Route path="/records" element={<Records />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/onboarding" element={<Onboarding />} />

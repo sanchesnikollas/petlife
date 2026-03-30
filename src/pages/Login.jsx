@@ -6,13 +6,29 @@ export default function Login({ onLogin }) {
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  const set = (key, val) => setForm((p) => ({ ...p, [key]: val }));
+  const set = (key, val) => {
+    setForm((p) => ({ ...p, [key]: val }));
+    setErrors((p) => ({ ...p, [key]: undefined }));
+  };
+
+  const validateForm = () => {
+    const errs = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!form.email.trim()) errs.email = 'Informe o email';
+    else if (!emailRegex.test(form.email)) errs.email = 'Email inválido';
+    if (!form.password) errs.password = 'Informe a senha';
+    else if (form.password.length < 6) errs.password = 'Mínimo 6 caracteres';
+    if (mode === 'register' && !form.name.trim()) errs.name = 'Informe seu nome';
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
     setLoading(true);
-    // Simula delay de autenticação
     setTimeout(() => {
       setLoading(false);
       onLogin(form);
@@ -50,59 +66,72 @@ export default function Login({ onLogin }) {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-3 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
           {mode === 'register' && (
-            <div className="relative">
-              <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary">
-                <PawPrint size={16} />
+            <div>
+              <div className="relative">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary">
+                  <PawPrint size={16} />
+                </div>
+                <input
+                  className={`${inputClass} ${errors.name ? 'border-danger ring-2 ring-danger/20' : ''}`}
+                  placeholder="Seu nome"
+                  value={form.name}
+                  onChange={(e) => set('name', e.target.value)}
+                  autoComplete="name"
+                />
               </div>
-              <input
-                className={inputClass}
-                placeholder="Seu nome"
-                value={form.name}
-                onChange={(e) => set('name', e.target.value)}
-                autoComplete="name"
-              />
+              {errors.name && <p className="text-xs text-danger mt-1 pl-1">{errors.name}</p>}
             </div>
           )}
 
-          <div className="relative">
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary">
-              <Mail size={16} />
+          <div>
+            <div className="relative">
+              <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary">
+                <Mail size={16} />
+              </div>
+              <input
+                type="email"
+                className={`${inputClass} ${errors.email ? 'border-danger ring-2 ring-danger/20' : ''}`}
+                placeholder="Email"
+                value={form.email}
+                onChange={(e) => set('email', e.target.value)}
+                autoComplete="email"
+                autoFocus
+              />
             </div>
-            <input
-              type="email"
-              className={inputClass}
-              placeholder="Email"
-              value={form.email}
-              onChange={(e) => set('email', e.target.value)}
-              autoComplete="email"
-              autoFocus
-            />
+            {errors.email && <p className="text-xs text-danger mt-1 pl-1">{errors.email}</p>}
           </div>
 
-          <div className="relative">
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary">
-              <Lock size={16} />
+          <div>
+            <div className="relative">
+              <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary">
+                <Lock size={16} />
+              </div>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className={`${inputClass} pr-11 ${errors.password ? 'border-danger ring-2 ring-danger/20' : ''}`}
+                placeholder="Senha (mínimo 6 caracteres)"
+                value={form.password}
+                onChange={(e) => set('password', e.target.value)}
+                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-secondary hover:text-primary"
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
-            <input
-              type={showPassword ? 'text' : 'password'}
-              className={`${inputClass} pr-11`}
-              placeholder="Senha"
-              value={form.password}
-              onChange={(e) => set('password', e.target.value)}
-              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-secondary hover:text-primary"
-            >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-            </button>
+            {errors.password && <p className="text-xs text-danger mt-1 pl-1">{errors.password}</p>}
           </div>
 
           {mode === 'login' && (
             <div className="text-right">
-              <button type="button" className="text-xs font-semibold text-primary hover:text-primary-light">
+              <button
+                type="button"
+                onClick={() => alert('Um link de recuperação seria enviado para o email informado. (Funcionalidade disponível com backend)')}
+                className="text-xs font-semibold text-primary hover:text-primary-light"
+              >
                 Esqueci minha senha
               </button>
             </div>
