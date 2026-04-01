@@ -2,6 +2,11 @@ import { useState } from 'react';
 import { usePet } from '../context/PetContext';
 import Modal from '../components/Modal';
 import EmptyState from '../components/EmptyState';
+import { SkeletonList } from '../components/Skeleton';
+import { useVaccines, useAddVaccine } from '../hooks/useVaccines';
+import { useDewormings, useAddDeworming } from '../hooks/useDewormings';
+import { useMedications, useAddMedication } from '../hooks/useMedications';
+import { useConsultations, useAddConsultation } from '../hooks/useConsultations';
 import {
   Syringe, Bug, Stethoscope, Pill, ChevronRight,
   CheckCircle2, AlertTriangle, XCircle, Clock, Plus,
@@ -29,9 +34,25 @@ const initialMedicationForm = { name: '', dose: '', frequency: '', duration: '',
 const initialConsultationForm = { date: '', type: '', clinic: '', vet: '', notes: '' };
 
 export default function Health() {
-  const { pet, addVaccine, addMedication, addConsultation, addDeworming } = usePet();
+  const { pet, activePetId, showToast } = usePet();
   const [activeTab, setActiveTab] = useState('vaccines');
   const [showModal, setShowModal] = useState(false);
+
+  // React Query hooks
+  const { data: vaccines = [], isLoading: vaccinesLoading } = useVaccines(activePetId);
+  const { data: dewormings = [], isLoading: dewormingsLoading } = useDewormings(activePetId);
+  const { data: medications = [], isLoading: medsLoading } = useMedications(activePetId);
+  const { data: consultations = [], isLoading: consultationsLoading } = useConsultations(activePetId);
+  const addVaccineMut = useAddVaccine(activePetId);
+  const addDewormingMut = useAddDeworming(activePetId);
+  const addMedicationMut = useAddMedication(activePetId);
+  const addConsultationMut = useAddConsultation(activePetId);
+
+  // Derive next consultation from future consultations
+  const now = new Date();
+  const nextConsultation = consultations
+    .filter((c) => c.date && parseISO(c.date) >= now)
+    .sort((a, b) => parseISO(a.date) - parseISO(b.date))[0] || null;
 
   const [vaccineForm, setVaccineForm] = useState(initialVaccineForm);
   const [dewormingForm, setDewormingForm] = useState(initialDewormingForm);
@@ -60,15 +81,14 @@ export default function Health() {
     if (vaccineForm.lastDone && vaccineForm.nextDue && vaccineForm.lastDone > vaccineForm.nextDue) errs.vDateOrder = true;
     if (Object.keys(errs).length) { setFormErrors(errs); return; }
     setFormErrors({});
-    addVaccine({
+    addVaccineMut.mutate({
       name: vaccineForm.name,
       lastDone: vaccineForm.lastDone,
       nextDue: vaccineForm.nextDue,
       status: 'ok',
       clinic: vaccineForm.clinic,
       vet: vaccineForm.vet,
-    });
-    closeModal();
+    }, { onSuccess: () => { showToast('Vacina registrada!'); closeModal(); }, onError: () => showToast('Erro ao salvar.', 'error') });
   };
 
   const handleAddDeworming = () => {
@@ -78,14 +98,13 @@ export default function Health() {
     if (!dewormingForm.nextDue) errs.dNextDue = true;
     if (Object.keys(errs).length) { setFormErrors(errs); return; }
     setFormErrors({});
-    addDeworming({
+    addDewormingMut.mutate({
       name: dewormingForm.name,
       product: dewormingForm.product,
       lastDone: dewormingForm.lastDone,
       nextDue: dewormingForm.nextDue,
       status: 'ok',
-    });
-    closeModal();
+    }, { onSuccess: () => { showToast('Vermífugo registrado!'); closeModal(); }, onError: () => showToast('Erro ao salvar.', 'error') });
   };
 
   const handleAddMedication = () => {
@@ -96,7 +115,7 @@ export default function Health() {
     if (!medicationForm.duration || Number(medicationForm.duration) <= 0) errs.mDuration = true;
     if (Object.keys(errs).length) { setFormErrors(errs); return; }
     setFormErrors({});
-    addMedication({
+    addMedicationMut.mutate({
       name: medicationForm.name,
       dose: medicationForm.dose,
       frequency: medicationForm.frequency,
@@ -105,8 +124,7 @@ export default function Health() {
       daysElapsed: 0,
       nextDue: medicationForm.nextDue,
       active: true,
-    });
-    closeModal();
+    }, { onSuccess: () => { showToast('Medicação registrada!'); closeModal(); }, onError: () => showToast('Erro ao salvar.', 'error') });
   };
 
   const handleAddConsultation = () => {
@@ -115,14 +133,13 @@ export default function Health() {
     if (!consultationForm.type) errs.cType = true;
     if (Object.keys(errs).length) { setFormErrors(errs); return; }
     setFormErrors({});
-    addConsultation({
+    addConsultationMut.mutate({
       date: consultationForm.date,
       type: consultationForm.type,
       clinic: consultationForm.clinic,
       vet: consultationForm.vet,
       notes: consultationForm.notes,
-    });
-    closeModal();
+    }, { onSuccess: () => { showToast('Consulta registrada!'); closeModal(); }, onError: () => showToast('Erro ao salvar.', 'error') });
   };
 
   const modalTitles = {
@@ -156,9 +173,10 @@ export default function Health() {
       </div>
 
       {/* Vaccines */}
-      {activeTab === 'vaccines' && (
+      {activeTab === 'vaccines' && vaccinesLoading && <SkeletonList count={3} />}
+      {activeTab === 'vaccines' && !vaccinesLoading && (
         <div className="space-y-3 stagger-children">
-          {pet.vaccines.length === 0 ? (
+          {vaccines.length === 0 ? (
             <EmptyState
               icon={Syringe}
               title="Nenhuma vacina registrada"
@@ -166,7 +184,7 @@ export default function Health() {
               action={{ label: 'Adicionar vacina', icon: Plus, onClick: openModal }}
             />
           ) : (
-            pet.vaccines.map((v) => {
+            vaccines.map((v) => {
               const s = statusConfig[v.status] || statusConfig.ok;
               return (
                 <div key={v.id} className="card-interactive bg-surface-alt rounded-2xl p-4 border border-gray-100 shadow-sm">
@@ -198,9 +216,10 @@ export default function Health() {
       )}
 
       {/* Dewormings */}
-      {activeTab === 'dewormings' && (
+      {activeTab === 'dewormings' && dewormingsLoading && <SkeletonList count={3} />}
+      {activeTab === 'dewormings' && !dewormingsLoading && (
         <div className="space-y-3 stagger-children">
-          {pet.dewormings.length === 0 ? (
+          {dewormings.length === 0 ? (
             <EmptyState
               icon={Bug}
               title="Nenhum vermífugo registrado"
@@ -208,7 +227,7 @@ export default function Health() {
               action={{ label: 'Adicionar vermífugo', icon: Plus, onClick: openModal }}
             />
           ) : (
-            pet.dewormings.map((d) => {
+            dewormings.map((d) => {
               const s = statusConfig[d.status] || statusConfig.ok;
               return (
                 <div key={d.id} className="card-interactive bg-surface-alt rounded-2xl p-4 border border-gray-100 shadow-sm">
@@ -240,9 +259,10 @@ export default function Health() {
       )}
 
       {/* Medications */}
-      {activeTab === 'medications' && (
+      {activeTab === 'medications' && medsLoading && <SkeletonList count={3} />}
+      {activeTab === 'medications' && !medsLoading && (
         <div className="space-y-3 stagger-children">
-          {pet.medications.length === 0 ? (
+          {medications.length === 0 ? (
             <EmptyState
               icon={Pill}
               title="Nenhuma medicação ativa"
@@ -250,7 +270,7 @@ export default function Health() {
               action={{ label: 'Adicionar medicação', icon: Plus, onClick: openModal }}
             />
           ) : (
-            pet.medications.map((m) => {
+            medications.map((m) => {
               const progress = Math.min(100, Math.round((m.daysElapsed / m.duration) * 100));
               const daysRemaining = Math.max(0, m.duration - m.daysElapsed);
               return (
@@ -293,9 +313,10 @@ export default function Health() {
       )}
 
       {/* Consultations */}
-      {activeTab === 'consultations' && (
+      {activeTab === 'consultations' && consultationsLoading && <SkeletonList count={3} />}
+      {activeTab === 'consultations' && !consultationsLoading && (
         <div className="space-y-3 stagger-children">
-          {pet.consultations.length === 0 && !pet.nextConsultation ? (
+          {consultations.length === 0 && !nextConsultation ? (
             <EmptyState
               icon={Stethoscope}
               title="Nenhuma consulta registrada"
@@ -305,25 +326,25 @@ export default function Health() {
           ) : (
             <>
               {/* Next consultation */}
-              {pet.nextConsultation && (
+              {nextConsultation && (
                 <div className="bg-primary-50 rounded-2xl p-4 border-2 border-primary/20">
                   <div className="flex items-center gap-2 mb-2">
                     <Stethoscope size={16} className="text-primary" />
                     <span className="text-xs font-semibold text-primary uppercase tracking-wide">Próxima consulta</span>
                   </div>
-                  <h3 className="text-sm font-bold text-text-primary capitalize">{pet.nextConsultation.type}</h3>
+                  <h3 className="text-sm font-bold text-text-primary capitalize">{nextConsultation.type}</h3>
                   <p className="text-xs text-text-secondary mt-0.5">
-                    {formatDate(pet.nextConsultation.date)} · {pet.nextConsultation.vet}
+                    {formatDate(nextConsultation.date)} · {nextConsultation.vet}
                   </p>
-                  <p className="text-xs text-text-secondary">{pet.nextConsultation.clinic}</p>
+                  <p className="text-xs text-text-secondary">{nextConsultation.clinic}</p>
                 </div>
               )}
 
               {/* History */}
-              {pet.consultations.length > 0 && (
+              {consultations.length > 0 && (
                 <>
                   <h3 className="text-sm font-semibold text-text-primary mt-4 mb-2">Histórico</h3>
-                  {pet.consultations.map((c) => (
+                  {consultations.map((c) => (
                     <div key={c.id} className="card-interactive bg-surface-alt rounded-2xl p-4 border border-gray-100 shadow-sm">
                       <div className="flex items-center justify-between">
                         <div>

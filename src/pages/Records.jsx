@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { usePet } from '../context/PetContext';
 import EmptyState from '../components/EmptyState';
+import { SkeletonList } from '../components/Skeleton';
+import { useRecords } from '../hooks/useRecords';
 import {
   Syringe, Pill, Stethoscope, Bug, FileText, Image,
   Filter, ChevronDown, ClipboardList,
@@ -26,16 +28,22 @@ const filterOptions = [
 ];
 
 export default function Records() {
-  const { pet } = usePet();
+  const { activePetId } = usePet();
   const [filter, setFilter] = useState('all');
+  const [page, setPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
 
-  const sortedRecords = [...pet.records]
+  const typeParam = filter === 'all' ? undefined : filter;
+  const { data: recordsResponse, isLoading } = useRecords(activePetId, { type: typeParam, page, limit: 20 });
+
+  const records = recordsResponse?.data || [];
+  const meta = recordsResponse?.meta || { page: 1, total: 0 };
+
+  const sortedRecords = [...records]
     .sort((a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
 
-  const filteredRecords =
-    filter === 'all' ? sortedRecords : sortedRecords.filter((r) => r.type === filter);
+  const filteredRecords = sortedRecords;
 
   const activeFilterLabel = filterOptions.find((f) => f.key === filter)?.label || 'Filtrar';
 
@@ -43,7 +51,7 @@ export default function Records() {
     <div className="pt-6 animate-fade-in-up">
       <h1 className="font-display text-2xl text-text-primary mb-1">Prontuário</h1>
       <p className="text-sm text-text-secondary mb-4">
-        Histórico clínico completo · {sortedRecords.length} registros
+        Histórico clínico completo · {meta.total || sortedRecords.length} registros
       </p>
 
       {/* Filter */}
@@ -66,7 +74,7 @@ export default function Records() {
             {filterOptions.map(({ key, label }) => (
               <button
                 key={key}
-                onClick={() => { setFilter(key); setShowFilters(false); }}
+                onClick={() => { setFilter(key); setPage(1); setShowFilters(false); }}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95 ${
                   filter === key
                     ? 'bg-primary text-white shadow-sm'
@@ -81,7 +89,9 @@ export default function Records() {
       </div>
 
       {/* Timeline */}
-      {filteredRecords.length > 0 ? (
+      {isLoading ? (
+        <SkeletonList count={4} />
+      ) : filteredRecords.length > 0 ? (
         <div className="relative">
           <div className="absolute left-5 top-3 bottom-3 w-px bg-gradient-to-b from-primary-lighter via-gray-200 to-transparent" />
 
@@ -145,6 +155,29 @@ export default function Records() {
           title="Nenhum registro encontrado"
           description={filter !== 'all' ? `Sem registros do tipo "${activeFilterLabel}". Tente outro filtro.` : 'O prontuário do seu pet aparecerá aqui conforme você registrar eventos.'}
         />
+      )}
+
+      {/* Pagination */}
+      {meta.total > 20 && (
+        <div className="flex items-center justify-center gap-3 mt-6 mb-4">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-text-secondary disabled:opacity-40 hover:border-gray-300 active:scale-[0.97] transition-all"
+          >
+            Anterior
+          </button>
+          <span className="text-xs font-medium text-text-secondary">
+            Página {meta.page || page} de {Math.ceil(meta.total / 20)}
+          </span>
+          <button
+            onClick={() => setPage((p) => p + 1)}
+            disabled={page >= Math.ceil(meta.total / 20)}
+            className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-text-secondary disabled:opacity-40 hover:border-gray-300 active:scale-[0.97] transition-all"
+          >
+            Próxima
+          </button>
+        </div>
       )}
     </div>
   );

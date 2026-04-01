@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { usePet } from '../context/PetContext';
+import { useAuth } from '../context/AuthContext';
+import { useProfile, useUpdateProfile } from '../hooks/useProfile';
+import { usePetsMutations } from '../hooks/usePets';
 import { useNavigate } from 'react-router-dom';
 import {
   Dog, Cat, User, Bell, CreditCard, LogOut,
@@ -19,11 +22,16 @@ function getAge(birthDate) {
 
 export default function Settings() {
   const {
-    pet, pets, activePetId, switchPet, startAddingPet, removePet,
-    tutor, setTutor, reminders, setReminders,
-    resetData, setHasCompletedOnboarding, showToast, logout,
+    pet, pets, activePetId, switchPet, startAddingPet,
+    setHasCompletedOnboarding, showToast, resetLocalState,
   } = usePet();
+  const auth = useAuth();
+  const { data: profile } = useProfile();
+  const updateProfileMut = useUpdateProfile();
+  const { remove: removePetMut } = usePetsMutations();
+  const tutor = profile || { name: '', email: '', phone: '', plan: 'free' };
   const navigate = useNavigate();
+  const [reminders, setReminders] = useState({ vaccines: true, medications: true, food: true, consultations: true });
 
   const [tutorModalOpen, setTutorModalOpen] = useState(false);
   const [remindersModalOpen, setRemindersModalOpen] = useState(false);
@@ -39,19 +47,22 @@ export default function Settings() {
   };
 
   const saveTutor = () => {
-    setTutor({ ...tutor, name: tutorForm.name, email: tutorForm.email, phone: tutorForm.phone });
-    setTutorModalOpen(false);
-    showToast('Informações do tutor atualizadas!');
+    updateProfileMut.mutate({ name: tutorForm.name, email: tutorForm.email, phone: tutorForm.phone }, {
+      onSuccess: () => { setTutorModalOpen(false); showToast('Informações do tutor atualizadas!'); },
+      onError: () => showToast('Erro ao salvar.', 'error'),
+    });
   };
 
   const toggleReminder = (key) => {
     setReminders((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const handleResetData = () => {
-    resetData();
+  const handleResetData = async () => {
     setResetConfirmOpen(false);
+    resetLocalState();
+    await auth.logout();
     showToast('Dados restaurados ao padrão!');
+    navigate('/');
   };
 
   const reminderLabels = [
@@ -225,7 +236,7 @@ export default function Settings() {
 
       {/* Logout */}
       <button
-        onClick={() => { logout(); navigate('/'); }}
+        onClick={async () => { resetLocalState(); await auth.logout(); navigate('/'); }}
         className="animate-fade-in-up w-full flex items-center justify-center gap-2 p-3 rounded-2xl border border-danger/20 text-danger text-sm font-semibold hover:bg-danger-light active:scale-[0.97] transition-all mt-2 mb-8"
       >
         <LogOut size={16} />
@@ -362,8 +373,10 @@ export default function Settings() {
               </button>
               <button
                 onClick={() => {
-                  removePet(removePetConfirm.id);
-                  setRemovePetConfirm(null);
+                  removePetMut.mutate(removePetConfirm.id, {
+                    onSuccess: () => { showToast('Pet removido.'); setRemovePetConfirm(null); },
+                    onError: () => showToast('Erro ao remover pet.', 'error'),
+                  });
                 }}
                 className="flex-1 py-3 rounded-xl bg-danger text-white font-semibold text-sm hover:bg-danger/90 active:scale-[0.98] transition-transform"
               >

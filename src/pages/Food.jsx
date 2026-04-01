@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import { usePet } from '../context/PetContext';
 import WeightChart from '../components/WeightChart';
 import Modal from '../components/Modal';
+import { SkeletonCard, SkeletonList } from '../components/Skeleton';
+import { useFood } from '../hooks/useFood';
+import { useMeals, useLogMeal } from '../hooks/useMeals';
+import { useWeight } from '../hooks/useWeight';
 import {
   UtensilsCrossed, Clock, CheckCircle2, Package, Scale,
   ScanLine, ToggleLeft, ToggleRight, PartyPopper, Flame,
@@ -9,21 +13,32 @@ import {
 import { format } from 'date-fns';
 
 export default function Food() {
-  const { pet, logMeal, showToast } = usePet();
+  const { pet, activePetId, showToast } = usePet();
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
+
+  // React Query hooks
+  const { data: foodData, isLoading: foodLoading } = useFood(activePetId);
+  const { data: mealsData = [], isLoading: mealsLoading } = useMeals(activePetId, todayStr);
+  const { data: weightHistory = [], isLoading: weightLoading } = useWeight(activePetId);
+  const logMealMut = useLogMeal(activePetId);
+
+  const food = foodData || pet?.food || { schedule: [], portionGrams: 0, brand: '', mealsPerDay: 0, type: 'dry', line: '' };
   const [remindersOn, setRemindersOn] = useState(true);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [scanPhase, setScanPhase] = useState('scanning'); // 'scanning' | 'found'
   const [justLogged, setJustLogged] = useState(null); // time string of just-logged meal
 
-  const todayStr = format(new Date(), 'yyyy-MM-dd');
-  const todayMeals = pet.mealLog.filter((m) => m.date === todayStr);
-  const mealsDone = todayMeals.filter((m) => m.given).length;
-  const allMealsDone = mealsDone >= pet.food.mealsPerDay;
+  const todayMeals = mealsData.filter((m) => m.given);
+  const mealsDone = todayMeals.length;
+  const allMealsDone = mealsDone >= food.mealsPerDay;
 
-  const dailyKcal = Math.round(pet.food.portionGrams * pet.food.mealsPerDay * 3.5);
+  const dailyKcal = Math.round(food.portionGrams * food.mealsPerDay * 3.5);
 
   const handleLogMeal = (time) => {
-    logMeal({ date: todayStr, time, given: true });
+    logMealMut.mutate({ date: todayStr, time, given: true }, {
+      onSuccess: () => showToast('Refeição registrada!'),
+      onError: () => showToast('Erro ao registrar.', 'error'),
+    });
     setJustLogged(time);
     setTimeout(() => setJustLogged(null), 1200);
   };
@@ -47,6 +62,18 @@ export default function Food() {
 
   const foodTypeLabel = { dry: 'Seca', wet: 'Úmida', mixed: 'Mista' };
 
+  if (foodLoading) {
+    return (
+      <div className="pt-6">
+        <h1 className="font-display text-2xl text-text-primary mb-1">Alimentação</h1>
+        <p className="text-sm text-text-secondary mb-5">Rotina alimentar e controle de peso</p>
+        <SkeletonCard className="mb-4" />
+        <SkeletonCard className="mb-4" />
+        <SkeletonList count={2} />
+      </div>
+    );
+  }
+
   return (
     <div className="pt-6">
       <h1 className="font-display text-2xl text-text-primary mb-1">Alimentação</h1>
@@ -59,22 +86,22 @@ export default function Food() {
             <Package size={20} className="text-accent" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-text-primary">{pet.food.brand}</h3>
-            <p className="text-xs text-text-secondary">{pet.food.line || foodTypeLabel[pet.food.type]}</p>
+            <h3 className="text-sm font-bold text-text-primary">{food.brand}</h3>
+            <p className="text-xs text-text-secondary">{food.line || foodTypeLabel[food.type]}</p>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-2 mb-2">
           <div className="bg-surface rounded-xl p-2.5 text-center">
             <p className="text-[10px] text-text-secondary font-medium uppercase tracking-wide">Porção</p>
-            <p className="text-sm font-bold text-text-primary mt-0.5">{pet.food.portionGrams}g</p>
+            <p className="text-sm font-bold text-text-primary mt-0.5">{food.portionGrams}g</p>
           </div>
           <div className="bg-surface rounded-xl p-2.5 text-center">
             <p className="text-[10px] text-text-secondary font-medium uppercase tracking-wide">Refeições</p>
-            <p className="text-sm font-bold text-text-primary mt-0.5">{pet.food.mealsPerDay}x/dia</p>
+            <p className="text-sm font-bold text-text-primary mt-0.5">{food.mealsPerDay}x/dia</p>
           </div>
           <div className="bg-surface rounded-xl p-2.5 text-center">
             <p className="text-[10px] text-text-secondary font-medium uppercase tracking-wide">Total</p>
-            <p className="text-sm font-bold text-text-primary mt-0.5">{pet.food.portionGrams * pet.food.mealsPerDay}g</p>
+            <p className="text-sm font-bold text-text-primary mt-0.5">{food.portionGrams * food.mealsPerDay}g</p>
           </div>
         </div>
         {/* Daily caloric estimate */}
@@ -89,7 +116,7 @@ export default function Food() {
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-bold text-text-primary">Refeições de Hoje</h3>
           <span className="text-xs font-semibold text-primary bg-primary-50 px-2.5 py-1 rounded-full">
-            {mealsDone}/{pet.food.mealsPerDay}
+            {mealsDone}/{food.mealsPerDay}
           </span>
         </div>
 
@@ -104,8 +131,8 @@ export default function Food() {
           </div>
         ) : (
           <div className="space-y-2">
-            {pet.food.schedule.map((time, idx) => {
-              const done = todayMeals.some((m) => m.time === time && m.given);
+            {food.schedule.map((time, idx) => {
+              const done = mealsData.some((m) => m.time === time && m.given);
               const wasJustLogged = justLogged === time;
               return (
                 <div
@@ -126,7 +153,7 @@ export default function Food() {
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-text-primary">{time}</p>
-                      <p className="text-xs text-text-secondary">{pet.food.portionGrams}g</p>
+                      <p className="text-xs text-text-secondary">{food.portionGrams}g</p>
                     </div>
                   </div>
                   {!done && (
@@ -235,7 +262,7 @@ export default function Food() {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-text-primary">Produto encontrado!</h3>
-                <p className="text-xs text-text-secondary">{pet.food.brand}</p>
+                <p className="text-xs text-text-secondary">{food.brand}</p>
               </div>
             </div>
 
@@ -271,7 +298,7 @@ export default function Food() {
 
       {/* Weight Chart */}
       <div className="animate-fade-in-up" style={{ animationDelay: '320ms' }}>
-        <WeightChart data={pet.weightHistory} />
+        <WeightChart data={weightHistory} />
       </div>
     </div>
   );
