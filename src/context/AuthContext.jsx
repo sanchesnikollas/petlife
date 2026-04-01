@@ -1,50 +1,48 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import api, { setAccessToken, ApiError } from '../lib/api.js';
+import api, { setAccessToken, setRefreshToken, ApiError } from '../lib/api.js';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true); // true during initial silent refresh
+  const [isLoading, setIsLoading] = useState(true);
 
   const isAuthenticated = !!user;
 
-  // Called after successful login/register/refresh
   const setSession = useCallback((data) => {
     setAccessToken(data.accessToken);
+    if (data.refreshToken) setRefreshToken(data.refreshToken);
     setUser(data.user);
   }, []);
 
   const clearSession = useCallback(() => {
     setAccessToken(null);
+    setRefreshToken(null);
     setUser(null);
   }, []);
 
-  // Login
   const login = useCallback(async (email, password) => {
     const res = await api.post('/auth/login', { email, password });
     setSession(res.data);
     return res.data;
   }, [setSession]);
 
-  // Register
   const register = useCallback(async (name, email, password) => {
     const res = await api.post('/auth/register', { name, email, password });
     setSession(res.data);
     return res.data;
   }, [setSession]);
 
-  // Logout
   const logout = useCallback(async () => {
     try {
       await api.del('/auth/logout');
     } catch {
-      // Ignore errors — we clear locally regardless
+      // Ignore
     }
     clearSession();
   }, [clearSession]);
 
-  // Silent refresh on mount (cookie may hold valid refresh token)
+  // Silent refresh on mount
   useEffect(() => {
     let cancelled = false;
     async function silentRefresh() {
@@ -63,14 +61,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated,
-        isLoading,
-        login,
-        register,
-        logout,
-      }}
+      value={{ user, isAuthenticated, isLoading, login, register, logout }}
     >
       {children}
     </AuthContext.Provider>

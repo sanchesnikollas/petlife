@@ -1,11 +1,14 @@
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-// Module-level token — AuthContext sets this, api.js reads it directly.
-// This avoids React re-renders and avoids stale closures.
 let accessToken = null;
+let refreshTokenValue = null;
 
 export function setAccessToken(token) {
   accessToken = token;
+}
+
+export function setRefreshToken(token) {
+  refreshTokenValue = token;
 }
 
 export function getAccessToken() {
@@ -15,19 +18,21 @@ export function getAccessToken() {
 let isRefreshing = false;
 let refreshPromise = null;
 
-async function refreshToken() {
-  // Deduplicate concurrent refresh attempts
+async function doRefresh() {
   if (isRefreshing) return refreshPromise;
   isRefreshing = true;
   refreshPromise = fetch(`${BASE_URL}/auth/refresh`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken: refreshTokenValue }),
   })
     .then(async (res) => {
       if (!res.ok) throw new Error('Refresh failed');
       const json = await res.json();
-      accessToken = json.data?.accessToken || json.accessToken;
+      const data = json.data || json;
+      accessToken = data.accessToken;
+      if (data.refreshToken) refreshTokenValue = data.refreshToken;
       return data;
     })
     .finally(() => {
@@ -58,20 +63,18 @@ async function request(method, path, body) {
   let res = await fetch(url, opts);
 
   // 401 interceptor — try refresh once, then retry
-  if (res.status === 401 && path !== '/auth/refresh' && path !== '/auth/login') {
+  if (res.status === 401 && path !== '/auth/refresh' && path !== '/auth/login' && path !== '/auth/register') {
     try {
-      await refreshToken();
-      // Retry with new token
+      await doRefresh();
       const retryHeaders = { ...headers, Authorization: `Bearer ${accessToken}` };
       res = await fetch(url, { ...opts, headers: retryHeaders });
     } catch {
-      // Refresh failed — force logout handled by AuthContext
       accessToken = null;
+      refreshTokenValue = null;
       throw new ApiError(401, 'SESSION_EXPIRED', 'Sessão expirada. Faça login novamente.', null);
     }
   }
 
-  // Parse response
   if (res.status === 204) return null;
 
   const data = await res.json().catch(() => null);
