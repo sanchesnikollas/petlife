@@ -22,16 +22,16 @@ export function AuthProvider({ children }) {
 
   // Login
   const login = useCallback(async (email, password) => {
-    const data = await api.post('/auth/login', { email, password });
-    setSession(data);
-    return data;
+    const res = await api.post('/auth/login', { email, password });
+    setSession(res.data);
+    return res.data;
   }, [setSession]);
 
   // Register
   const register = useCallback(async (name, email, password) => {
-    const data = await api.post('/auth/register', { name, email, password });
-    setSession(data);
-    return data;
+    const res = await api.post('/auth/register', { name, email, password });
+    setSession(res.data);
+    return res.data;
   }, [setSession]);
 
   // Logout
@@ -49,8 +49,8 @@ export function AuthProvider({ children }) {
     let cancelled = false;
     async function silentRefresh() {
       try {
-        const data = await api.post('/auth/refresh');
-        if (!cancelled) setSession(data);
+        const res = await api.post('/auth/refresh');
+        if (!cancelled) setSession(res.data);
       } catch {
         if (!cancelled) clearSession();
       } finally {

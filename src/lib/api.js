@@ -26,8 +26,8 @@ async function refreshToken() {
   })
     .then(async (res) => {
       if (!res.ok) throw new Error('Refresh failed');
-      const data = await res.json();
-      accessToken = data.accessToken;
+      const json = await res.json();
+      accessToken = json.data?.accessToken || json.accessToken;
       return data;
     })
     .finally(() => {

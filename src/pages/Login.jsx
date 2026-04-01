@@ -22,7 +22,7 @@ export default function Login() {
     if (!form.email.trim()) errs.email = 'Informe o email';
     else if (!emailRegex.test(form.email)) errs.email = 'Email inválido';
     if (!form.password) errs.password = 'Informe a senha';
-    else if (form.password.length < 6) errs.password = 'Mínimo 6 caracteres';
+    else if (form.password.length < 8) errs.password = 'Mínimo 8 caracteres';
     if (mode === 'register' && !form.name.trim()) errs.name = 'Informe seu nome';
     setErrors(errs);
     return Object.keys(errs).length === 0;
