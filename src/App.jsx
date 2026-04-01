@@ -12,13 +12,14 @@ import Food from './pages/Food';
 import Community from './pages/Community';
 import Records from './pages/Records';
 import Settings from './pages/Settings';
+import { useState, useCallback } from 'react';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 3,
-      staleTime: 30 * 1000,       // 30 seconds
-      gcTime: 5 * 60 * 1000,      // 5 minutes
+      retry: 1,
+      staleTime: 30 * 1000,
+      gcTime: 5 * 60 * 1000,
       refetchOnWindowFocus: true,
     },
     mutations: {
@@ -27,11 +28,19 @@ const queryClient = new QueryClient({
   },
 });
 
-function AppRoutes() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { hasSeenWelcome, setHasSeenWelcome, hasCompletedOnboarding, addingNewPet } = usePet();
+const WELCOME_KEY = 'petlife_has_seen_welcome';
 
-  // Show nothing while checking auth
+function AuthGate() {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const [hasSeenWelcome, setHasSeenWelcomeState] = useState(
+    () => localStorage.getItem(WELCOME_KEY) === 'true'
+  );
+
+  const setHasSeenWelcome = useCallback((val) => {
+    setHasSeenWelcomeState(val);
+    localStorage.setItem(WELCOME_KEY, String(val));
+  }, []);
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
@@ -40,18 +49,26 @@ function AppRoutes() {
     );
   }
 
-  // Step 1: Welcome intro (only first time)
   if (!hasSeenWelcome) {
     return <Welcome onContinue={() => setHasSeenWelcome(true)} />;
   }
 
-  // Step 2: Login / Register
   if (!isAuthenticated) {
     return <Login />;
   }
 
-  // Step 3: Onboarding (first pet setup)
-  if (!hasCompletedOnboarding) {
+  // Only mount PetProvider AFTER authentication
+  return (
+    <PetProvider>
+      <AuthenticatedRoutes />
+    </PetProvider>
+  );
+}
+
+function AuthenticatedRoutes() {
+  const { hasCompletedOnboarding, addingNewPet } = usePet();
+
+  if (!hasCompletedOnboarding || addingNewPet) {
     return (
       <Routes>
         <Route path="/onboarding" element={<Onboarding />} />
@@ -60,17 +77,6 @@ function AppRoutes() {
     );
   }
 
-  // Step 3.5: Adding a new pet — show onboarding without Layout
-  if (addingNewPet) {
-    return (
-      <Routes>
-        <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="*" element={<Navigate to="/onboarding" replace />} />
-      </Routes>
-    );
-  }
-
-  // Step 4: Main app
   return (
     <Layout>
       <Routes>
@@ -92,9 +98,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
-          <PetProvider>
-            <AppRoutes />
-          </PetProvider>
+          <AuthGate />
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>

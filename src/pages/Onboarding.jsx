@@ -107,24 +107,14 @@ export default function Onboarding() {
 
     const petData = {
       name: form.name,
-      species: form.species,
+      species: form.species.toUpperCase(),
       breed: form.breed,
-      birthDate: form.birthDate,
-      sex: form.sex,
-      photo: form.photo,
-      weight: parseFloat(form.weight),
-      allergies: form.allergies,
-      conditions: form.conditions,
-      microchip: form.microchip,
-      food: {
-        brand: form.foodBrand,
-        line: '',
-        type: form.foodType,
-        portionGrams: parseInt(form.portionGrams),
-        mealsPerDay: form.mealsPerDay,
-        schedule: form.schedule,
-      },
-      weightHistory: [{ date: new Date().toISOString().slice(0, 7), value: parseFloat(form.weight) }],
+      birthDate: form.birthDate ? new Date(form.birthDate).toISOString() : undefined,
+      sex: form.sex?.toUpperCase() || undefined,
+      weight: parseFloat(form.weight) || undefined,
+      allergies: form.allergies.length ? form.allergies : undefined,
+      conditions: form.conditions ? [form.conditions] : undefined,
+      microchip: form.microchip || undefined,
     };
 
     createPet.mutate(petData, {
