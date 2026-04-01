@@ -7,6 +7,10 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
+
+ARG VITE_API_URL=https://petlife-api-production-d707.up.railway.app
+ENV VITE_API_URL=$VITE_API_URL
+
 RUN npm run build
 
 # ─── Stage 2: Serve ───
