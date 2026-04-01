@@ -1,4 +1,5 @@
 import { usePet } from '../context/PetContext';
+import { useVaccines } from '../hooks/useVaccines';
 import { Dog, Cat, AlertTriangle, CheckCircle2, Sparkles } from 'lucide-react';
 import { differenceInYears, differenceInMonths, parseISO } from 'date-fns';
 
@@ -20,8 +21,9 @@ function getGreeting() {
 }
 
 export default function PetHeader() {
-  const { pet } = usePet();
-  const hasOverdue = pet.vaccines.some((v) => v.status === 'overdue');
+  const { pet, activePetId } = usePet();
+  const { data: vaccines = [] } = useVaccines(activePetId);
+  const hasOverdue = vaccines.some((v) => v.status === 'overdue');
   const age = getAge(pet.birthDate);
   const greeting = getGreeting();
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePet } from '../context/PetContext';
+import { usePetsMutations } from '../hooks/usePets';
 import {
   Dog, Cat, ChevronRight, ChevronLeft, Camera, X, Plus, PawPrint,
   Heart, Sparkles, Check,
@@ -14,7 +15,8 @@ const STEPS = [
 
 export default function Onboarding() {
   const navigate = useNavigate();
-  const { updatePet, setHasCompletedOnboarding, showToast, addingNewPet, finishAddingPet, cancelAddingPet } = usePet();
+  const { setHasCompletedOnboarding, showToast, addingNewPet, finishAddingPet, cancelAddingPet } = usePet();
+  const { create: createPet } = usePetsMutations();
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState('forward');
   const [isFinishing, setIsFinishing] = useState(false);
@@ -125,16 +127,21 @@ export default function Onboarding() {
       weightHistory: [{ date: new Date().toISOString().slice(0, 7), value: parseFloat(form.weight) }],
     };
 
-    setTimeout(() => {
-      if (addingNewPet) {
-        finishAddingPet(petData);
-      } else {
-        updatePet(petData);
+    createPet.mutate(petData, {
+      onSuccess: (newPet) => {
+        const petId = newPet?.id || newPet?.data?.id;
+        if (petId) {
+          finishAddingPet(petId);
+        }
         setHasCompletedOnboarding(true);
-      }
-      showToast(`Bem-vindo(a), ${form.name}! 🐾`);
-      navigate('/');
-    }, 1200);
+        showToast(`Bem-vindo(a), ${form.name}! 🐾`);
+        navigate('/');
+      },
+      onError: () => {
+        setIsFinishing(false);
+        showToast('Erro ao criar pet. Tente novamente.', 'error');
+      },
+    });
   };
 
   const inputClass = (key) =>

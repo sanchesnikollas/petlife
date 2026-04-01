@@ -3,6 +3,12 @@ import { usePet } from '../context/PetContext';
 import PetHeader from '../components/PetHeader';
 import StatusCard from '../components/StatusCard';
 import Modal from '../components/Modal';
+import Skeleton, { SkeletonStatusGrid, SkeletonList } from '../components/Skeleton';
+import { useVaccines, useAddVaccine } from '../hooks/useVaccines';
+import { useMedications, useAddMedication } from '../hooks/useMedications';
+import { useAddWeight } from '../hooks/useWeight';
+import { useAddRecord } from '../hooks/useRecords';
+import { useFood } from '../hooks/useFood';
 import {
   Syringe, UtensilsCrossed, Pill, Weight, Clock, CalendarCheck,
   ChevronRight, ChevronDown, Plus, Stethoscope, FileText, Upload,
@@ -36,36 +42,48 @@ function formatDateShort(dateStr) {
 }
 
 export default function Dashboard() {
-  const { pet, addVaccine, addMedication, addWeightEntry, addRecord, showToast } = usePet();
+  const { pet, activePetId, showToast } = usePet();
   const [modal, setModal] = useState(null);
   const [formData, setFormData] = useState({});
   const [expandedEvent, setExpandedEvent] = useState(null);
 
-  const nextVaccine = pet.vaccines.find((v) => v.status !== 'ok') || pet.vaccines[0];
-  const nextMeal = getNextMealTime(pet.food.schedule);
-  const activeMeds = pet.medications.filter((m) => m.active);
+  // React Query hooks
+  const { data: vaccines = [], isLoading: vaccinesLoading } = useVaccines(activePetId);
+  const { data: medications = [], isLoading: medsLoading } = useMedications(activePetId);
+  const { data: foodData, isLoading: foodLoading } = useFood(activePetId);
+  const addVaccineMut = useAddVaccine(activePetId);
+  const addMedicationMut = useAddMedication(activePetId);
+  const addWeightMut = useAddWeight(activePetId);
+  const addRecordMut = useAddRecord(activePetId);
+
+  const isLoading = !pet || vaccinesLoading || medsLoading || foodLoading;
+  const food = foodData || pet?.food || { schedule: [], portionGrams: 0, brand: '', mealsPerDay: 0 };
+
+  const nextVaccine = vaccines.find((v) => v.status !== 'ok') || vaccines[0];
+  const nextMeal = food.schedule?.length ? getNextMealTime(food.schedule) : '--';
+  const activeMeds = medications.filter((m) => m.active);
 
   const today = new Date();
   const weekEnd = addDays(today, 7);
   const upcomingEvents = [];
 
   // Meals for today
-  pet.food.schedule.forEach((time) => {
+  (food.schedule || []).forEach((time) => {
     upcomingEvents.push({
       type: 'meal',
       icon: UtensilsCrossed,
       color: 'text-accent',
       bg: 'bg-warning-light',
       title: `Refeicao -- ${time}`,
-      subtitle: `${pet.food.portionGrams}g de ${pet.food.brand}`,
-      details: `Racao: ${pet.food.brand}\nPorcao: ${pet.food.portionGrams}g\nHorario: ${time}`,
+      subtitle: `${food.portionGrams}g de ${food.brand}`,
+      details: `Racao: ${food.brand}\nPorcao: ${food.portionGrams}g\nHorario: ${time}`,
       date: today,
       time,
     });
   });
 
   // Vaccines
-  pet.vaccines.forEach((v) => {
+  vaccines.forEach((v) => {
     const d = parseISO(v.nextDue);
     if (isWithinInterval(d, { start: today, end: weekEnd }) || v.status === 'overdue') {
       upcomingEvents.push({
@@ -82,7 +100,7 @@ export default function Dashboard() {
   });
 
   // Medications
-  pet.medications.filter((m) => m.active).forEach((m) => {
+  medications.filter((m) => m.active).forEach((m) => {
     upcomingEvents.push({
       type: 'medication',
       icon: Pill,
@@ -162,17 +180,19 @@ export default function Dashboard() {
   const handleSave = () => {
     if (isSaveDisabled()) return;
 
+    const onDone = () => { setModal(null); setFormData({}); };
+
     if (modal === 'vaccine') {
-      addVaccine({
+      addVaccineMut.mutate({
         name: formData.name || '',
         lastDone: formData.date || new Date().toISOString().split('T')[0],
         nextDue: formData.nextDue || '',
         status: 'ok',
         clinic: formData.clinic || '',
         vet: formData.vet || '',
-      });
+      }, { onSuccess: () => { showToast('Vacina registrada!'); onDone(); }, onError: () => showToast('Erro ao salvar vacina.', 'error') });
     } else if (modal === 'medication') {
-      addMedication({
+      addMedicationMut.mutate({
         name: formData.name || '',
         dose: formData.dose || '',
         frequency: formData.frequency || '',
@@ -181,23 +201,21 @@ export default function Dashboard() {
         daysElapsed: 0,
         nextDue: formData.nextDue || '',
         active: true,
-      });
+      }, { onSuccess: () => { showToast('Medicação registrada!'); onDone(); }, onError: () => showToast('Erro ao salvar medicação.', 'error') });
     } else if (modal === 'weight') {
-      addWeightEntry({
+      addWeightMut.mutate({
         date: format(new Date(), 'yyyy-MM'),
         value: parseFloat(formData.weight) || 0,
-      });
+      }, { onSuccess: () => { showToast('Peso registrado!'); onDone(); }, onError: () => showToast('Erro ao salvar peso.', 'error') });
     } else if (modal === 'exam') {
-      addRecord({
+      addRecordMut.mutate({
         date: new Date().toISOString().split('T')[0],
         type: 'exam',
         title: formData.title || 'Exame',
         description: formData.description || '',
         attachments: [],
-      });
+      }, { onSuccess: () => { showToast('Exame registrado!'); onDone(); }, onError: () => showToast('Erro ao salvar exame.', 'error') });
     }
-    setModal(null);
-    setFormData({});
   };
 
   const handleFileUploadClick = () => {
@@ -207,6 +225,29 @@ export default function Dashboard() {
   const btnBase = 'w-full py-3 rounded-full font-semibold text-sm transition-all duration-200';
   const btnEnabled = `${btnBase} bg-primary text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98]`;
   const btnDisabled = `${btnBase} bg-gray-200 text-gray-400 cursor-not-allowed`;
+
+  if (isLoading) {
+    return (
+      <div>
+        <div className="pt-2 pb-4">
+          <Skeleton height={14} width="40%" rounded="md" className="mb-3" />
+          <div className="flex items-center gap-4">
+            <Skeleton width={64} height={64} rounded="2xl" />
+            <div className="flex-1 space-y-2">
+              <Skeleton height={24} width="50%" rounded="md" />
+              <Skeleton height={12} width="70%" rounded="md" />
+            </div>
+          </div>
+        </div>
+        <Skeleton height={20} width="50%" rounded="md" className="mb-4" />
+        <SkeletonStatusGrid />
+        <div className="mt-5">
+          <Skeleton height={18} width="40%" rounded="md" className="mb-3" />
+          <SkeletonList count={3} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -233,7 +274,7 @@ export default function Dashboard() {
           iconColor="bg-accent"
           label="Proxima refeicao"
           value={nextMeal}
-          sublabel={`${pet.food.portionGrams}g`}
+          sublabel={`${food.portionGrams}g`}
         />
         <StatusCard
           icon={Pill}

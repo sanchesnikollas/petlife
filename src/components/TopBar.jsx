@@ -1,10 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePet } from '../context/PetContext';
+import { useProfile } from '../hooks/useProfile';
+import { useVaccines } from '../hooks/useVaccines';
 import { Dog, Cat, Plus, ChevronDown } from 'lucide-react';
 
 export default function TopBar() {
-  const { pets, activePetId, switchPet, startAddingPet, tutor, pet } = usePet();
+  const { pets, activePetId, switchPet, startAddingPet, pet } = usePet();
+  const { data: profile } = useProfile();
+  const tutor = profile || { name: '...' };
+  const { data: vaccines = [] } = useVaccines(activePetId);
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const lastScrollY = useRef(0);
@@ -14,7 +19,7 @@ export default function TopBar() {
     navigate('/onboarding');
   };
 
-  const hasOverdue = pet.vaccines?.some((v) => v.status === 'overdue');
+  const hasOverdue = vaccines.some((v) => v.status === 'overdue');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -55,7 +60,7 @@ export default function TopBar() {
               </span>
             )}
             {/* Collapsed: show active pet mini + expand hint */}
-            {collapsed && (
+            {collapsed && pet && (
               <button
                 onClick={() => setCollapsed(false)}
                 className="flex items-center gap-1.5 shrink-0 bg-primary text-white pl-1.5 pr-2.5 py-1 rounded-full text-xs font-semibold shadow-sm animate-fade-in active:scale-95 transition-transform"

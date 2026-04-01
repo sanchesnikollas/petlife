@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { PawPrint, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { ApiError } from '../lib/api.js';
 
-export default function Login({ onLogin }) {
+export default function Login() {
+  const auth = useAuth();
   const [mode, setMode] = useState('login'); // 'login' | 'register'
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', password: '' });
@@ -25,14 +28,27 @@ export default function Login({ onLogin }) {
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
     setLoading(true);
-    setTimeout(() => {
+    try {
+      if (mode === 'register') {
+        await auth.register(form.name, form.email, form.password);
+      } else {
+        await auth.login(form.email, form.password);
+      }
+    } catch (err) {
+      if (err instanceof ApiError && err.fields) {
+        setErrors(err.fields);
+      } else if (err instanceof ApiError) {
+        setErrors({ email: err.message });
+      } else {
+        setErrors({ email: 'Erro de conexão. Tente novamente.' });
+      }
+    } finally {
       setLoading(false);
-      onLogin(form);
-    }, 1200);
+    }
   };
 
   const inputClass =
@@ -166,7 +182,7 @@ export default function Login({ onLogin }) {
         <div className="grid grid-cols-2 gap-3 animate-fade-in-up" style={{ animationDelay: '250ms' }}>
           <button
             type="button"
-            onClick={() => { setLoading(true); setTimeout(() => onLogin(form), 800); }}
+            onClick={() => { setErrors({ email: 'Login social estará disponível em breve.' }); }}
             className="flex items-center justify-center gap-2 py-3 rounded-xl border border-gray-200 bg-surface-alt text-sm font-medium text-text-primary hover:border-gray-300 active:scale-[0.97] transition-all"
           >
             <svg width="18" height="18" viewBox="0 0 24 24">
@@ -179,7 +195,7 @@ export default function Login({ onLogin }) {
           </button>
           <button
             type="button"
-            onClick={() => { setLoading(true); setTimeout(() => onLogin(form), 800); }}
+            onClick={() => { setErrors({ email: 'Login social estará disponível em breve.' }); }}
             className="flex items-center justify-center gap-2 py-3 rounded-xl border border-gray-200 bg-surface-alt text-sm font-medium text-text-primary hover:border-gray-300 active:scale-[0.97] transition-all"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
