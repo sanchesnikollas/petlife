@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { usePet } from '../context/PetContext';
 import PetHeader from '../components/PetHeader';
 import StatusCard from '../components/StatusCard';
@@ -42,6 +43,7 @@ function formatDateShort(dateStr) {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { pet, activePetId, showToast } = usePet();
   const [modal, setModal] = useState(null);
   const [formData, setFormData] = useState({});
@@ -320,7 +322,12 @@ export default function Dashboard() {
       <div className="mb-6 animate-fade-in-up">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-display text-lg text-text-primary">Proximos 7 dias</h2>
-          <span className="text-xs text-text-secondary font-medium">{upcomingEvents.length} eventos</span>
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate('/calendar')} className="text-xs font-semibold text-primary hover:text-primary-light transition-colors">
+              Ver calendario →
+            </button>
+            <span className="text-xs text-text-secondary font-medium">{upcomingEvents.length} eventos</span>
+          </div>
         </div>
         <div className="space-y-2.5 stagger-children">
           {upcomingEvents.slice(0, 8).map((event, i) => (

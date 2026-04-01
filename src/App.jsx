@@ -12,6 +12,7 @@ import Food from './pages/Food';
 import Community from './pages/Community';
 import Records from './pages/Records';
 import Settings from './pages/Settings';
+import Calendar from './pages/Calendar';
 import { useState, useCallback } from 'react';
 
 const queryClient = new QueryClient({
@@ -86,6 +87,7 @@ function AuthenticatedRoutes() {
         <Route path="/community" element={<Community />} />
         <Route path="/records" element={<Records />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/calendar" element={<Calendar />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
