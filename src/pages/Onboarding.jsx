@@ -33,6 +33,8 @@ export default function Onboarding() {
     allergies: [],
     conditions: '',
     microchip: '',
+    activityLevel: 'MODERATE',
+    healthPlan: '',
     neutered: false,
     neuteredDate: '',
     hasAllergies: false,
@@ -164,6 +166,8 @@ export default function Onboarding() {
       neuteredDate: form.neutered && form.neuteredDate
         ? new Date(form.neuteredDate).toISOString()
         : undefined,
+      activityLevel: form.activityLevel,
+      healthPlan: form.healthPlan || undefined,
     };
 
     createPet.mutate(petData, {
@@ -337,6 +341,31 @@ export default function Onboarding() {
       {step === 1 && (
         <div className="space-y-4">
           <div>
+            <label className="block text-xs font-semibold text-text-secondary mb-1.5">Nível de atividade</label>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { val: 'LOW', label: 'Leve', desc: 'Calmo' },
+                { val: 'MODERATE', label: 'Moderado', desc: 'Normal' },
+                { val: 'HIGH', label: 'Alto', desc: 'Agitado' },
+              ].map(({ val, label, desc }) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => set('activityLevel', val)}
+                  className={`p-3 rounded-xl border-2 text-center transition-all ${
+                    form.activityLevel === val
+                      ? 'border-primary bg-primary-50 text-primary shadow-sm'
+                      : 'border-gray-200 text-text-secondary hover:border-gray-300'
+                  }`}
+                >
+                  <p className="text-sm font-semibold">{label}</p>
+                  <p className="text-[10px] mt-0.5 opacity-70">{desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
             <label className="block text-xs font-semibold text-text-secondary mb-1.5">
               Peso atual (kg) <span className="text-danger">*</span>
             </label>
@@ -463,6 +492,16 @@ export default function Onboarding() {
               />
             </div>
           )}
+
+          <div>
+            <label className="block text-xs font-semibold text-text-secondary mb-1.5">Convênio / Plano de Saúde</label>
+            <input
+              className={inputClass('')}
+              placeholder="Ex: PetLove Saúde, Porto Seguro Pet"
+              value={form.healthPlan}
+              onChange={(e) => set('healthPlan', e.target.value)}
+            />
+          </div>
         </div>
       )}
 

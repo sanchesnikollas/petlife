@@ -3,11 +3,14 @@ import { usePet } from '../context/PetContext';
 import { useAuth } from '../context/AuthContext';
 import { useProfile, useUpdateProfile } from '../hooks/useProfile';
 import { usePetsMutations } from '../hooks/usePets';
+import { useVeterinarians, useAddVeterinarian, useUpdateVeterinarian, useDeleteVeterinarian } from '../hooks/useVeterinarians';
+import { useRoutine, useUpdateRoutine } from '../hooks/useRoutine';
 import { useNavigate } from 'react-router-dom';
 import {
   Dog, Cat, User, Bell, CreditCard, LogOut,
   ChevronRight, Edit3, Crown, PawPrint, Shield,
   ToggleLeft, ToggleRight, AlertTriangle, Plus, Trash2,
+  Stethoscope, Phone,
 } from 'lucide-react';
 import { differenceInYears, differenceInMonths, parseISO } from 'date-fns';
 import Modal from '../components/Modal';
@@ -37,6 +40,112 @@ export default function Settings() {
   const [remindersModalOpen, setRemindersModalOpen] = useState(false);
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
   const [removePetConfirm, setRemovePetConfirm] = useState(null);
+
+  // Veterinarians
+  const { data: veterinarians = [] } = useVeterinarians();
+  const addVetMut = useAddVeterinarian();
+  const updateVetMut = useUpdateVeterinarian();
+  const deleteVetMut = useDeleteVeterinarian();
+  const [vetModalOpen, setVetModalOpen] = useState(false);
+  const [editingVet, setEditingVet] = useState(null);
+  const [vetForm, setVetForm] = useState({ name: '', clinic: '', phone: '', email: '', specialty: '', notes: '' });
+  const [deleteVetConfirm, setDeleteVetConfirm] = useState(null);
+
+  const openAddVet = () => {
+    setEditingVet(null);
+    setVetForm({ name: '', clinic: '', phone: '', email: '', specialty: '', notes: '' });
+    setVetModalOpen(true);
+  };
+
+  const openEditVet = (vet) => {
+    setEditingVet(vet);
+    setVetForm({
+      name: vet.name || '',
+      clinic: vet.clinic || '',
+      phone: vet.phone || '',
+      email: vet.email || '',
+      specialty: vet.specialty || '',
+      notes: vet.notes || '',
+    });
+    setVetModalOpen(true);
+  };
+
+  const saveVet = () => {
+    if (!vetForm.name.trim()) return;
+    const payload = {
+      name: vetForm.name,
+      clinic: vetForm.clinic || undefined,
+      phone: vetForm.phone || undefined,
+      email: vetForm.email || undefined,
+      specialty: vetForm.specialty || undefined,
+      notes: vetForm.notes || undefined,
+    };
+    if (editingVet) {
+      updateVetMut.mutate({ id: editingVet.id, ...payload }, {
+        onSuccess: () => { setVetModalOpen(false); showToast('Veterinário atualizado!'); },
+        onError: () => showToast('Erro ao salvar.', 'error'),
+      });
+    } else {
+      addVetMut.mutate(payload, {
+        onSuccess: () => { setVetModalOpen(false); showToast('Veterinário adicionado!'); },
+        onError: () => showToast('Erro ao salvar.', 'error'),
+      });
+    }
+  };
+
+  const confirmDeleteVet = (vet) => setDeleteVetConfirm(vet);
+
+  const handleDeleteVet = () => {
+    if (!deleteVetConfirm) return;
+    deleteVetMut.mutate(deleteVetConfirm.id, {
+      onSuccess: () => { setDeleteVetConfirm(null); showToast('Veterinário removido.'); },
+      onError: () => showToast('Erro ao remover.', 'error'),
+    });
+  };
+
+  // Routine
+  const { data: routineData } = useRoutine(activePetId);
+  const updateRoutineMut = useUpdateRoutine(activePetId);
+  const [routineModalOpen, setRoutineModalOpen] = useState(false);
+  const [routineForm, setRoutineForm] = useState({
+    walksPerDay: 2,
+    walkDurationMinutes: 30,
+    bathFrequency: 'BIWEEKLY',
+    bathLocation: 'PETSHOP',
+    hasDaycare: false,
+    daycareName: '',
+    daycarePhone: '',
+  });
+
+  const openRoutineModal = () => {
+    if (routineData) {
+      setRoutineForm({
+        walksPerDay: routineData.walksPerDay ?? 2,
+        walkDurationMinutes: routineData.walkDurationMinutes ?? 30,
+        bathFrequency: routineData.bathFrequency ?? 'BIWEEKLY',
+        bathLocation: routineData.bathLocation ?? 'PETSHOP',
+        hasDaycare: routineData.hasDaycare ?? false,
+        daycareName: routineData.daycareName ?? '',
+        daycarePhone: routineData.daycarePhone ?? '',
+      });
+    }
+    setRoutineModalOpen(true);
+  };
+
+  const saveRoutine = () => {
+    updateRoutineMut.mutate({
+      walksPerDay: parseInt(routineForm.walksPerDay) || 0,
+      walkDurationMinutes: parseInt(routineForm.walkDurationMinutes) || 0,
+      bathFrequency: routineForm.bathFrequency,
+      bathLocation: routineForm.bathLocation,
+      hasDaycare: routineForm.hasDaycare,
+      daycareName: routineForm.hasDaycare ? routineForm.daycareName || undefined : undefined,
+      daycarePhone: routineForm.hasDaycare ? routineForm.daycarePhone || undefined : undefined,
+    }, {
+      onSuccess: () => { setRoutineModalOpen(false); showToast('Rotina atualizada!'); },
+      onError: () => showToast('Erro ao salvar rotina.', 'error'),
+    });
+  };
 
   // Tutor edit form state
   const [tutorForm, setTutorForm] = useState({ name: '', email: '', phone: '' });
@@ -181,6 +290,105 @@ export default function Settings() {
           </button>
         </div>
       </div>
+
+      {/* Meus Veterinários */}
+      <div className="animate-fade-in-up mb-5">
+        <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2 px-1">Meus veterinários</h3>
+        <div className="bg-surface-alt rounded-2xl border border-gray-100 shadow-sm overflow-hidden divide-y divide-gray-50">
+          {veterinarians.length === 0 && (
+            <div className="p-4 text-center text-sm text-text-secondary">
+              Nenhum veterinário cadastrado ainda.
+            </div>
+          )}
+          {veterinarians.map((vet) => (
+            <div key={vet.id} className="flex items-center gap-3 p-4">
+              <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center shrink-0">
+                <Stethoscope size={18} className="text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-bold text-text-primary truncate">{vet.name}</h4>
+                <p className="text-xs text-text-secondary truncate">
+                  {[vet.clinic, vet.specialty].filter(Boolean).join(' · ') || 'Veterinário'}
+                </p>
+                {vet.phone && (
+                  <p className="text-xs text-text-secondary flex items-center gap-1 mt-0.5">
+                    <Phone size={10} /> {vet.phone}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  onClick={() => openEditVet(vet)}
+                  className="p-2 rounded-xl text-text-secondary hover:bg-primary-50 hover:text-primary transition-colors"
+                  title="Editar"
+                >
+                  <Edit3 size={15} />
+                </button>
+                <button
+                  onClick={() => confirmDeleteVet(vet)}
+                  className="p-2 rounded-xl text-text-secondary hover:bg-danger-light hover:text-danger transition-colors"
+                  title="Remover"
+                >
+                  <Trash2 size={15} />
+                </button>
+              </div>
+            </div>
+          ))}
+          <button
+            onClick={openAddVet}
+            className="w-full flex items-center gap-3 p-4 text-primary hover:bg-primary-50/30 transition-colors"
+          >
+            <div className="w-10 h-10 rounded-xl border-2 border-dashed border-primary/30 flex items-center justify-center">
+              <Plus size={18} className="text-primary" />
+            </div>
+            <span className="text-sm font-semibold">Adicionar veterinário</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Rotina do Pet */}
+      {pet && (
+        <div className="animate-fade-in-up mb-5">
+          <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2 px-1">
+            Rotina de {pet.name}
+          </h3>
+          <div className="bg-surface-alt rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <button
+              onClick={openRoutineModal}
+              className="card-interactive w-full p-4 text-left hover:bg-surface"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-text-primary">Passeios</span>
+                  </div>
+                  <span className="text-xs font-medium text-text-secondary">
+                    {routineData?.walksPerDay ?? '—'}x/dia · {routineData?.walkDurationMinutes ?? '—'} min
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-text-primary">Banho</span>
+                  <span className="text-xs font-medium text-text-secondary">
+                    {{ WEEKLY: 'Semanal', BIWEEKLY: 'Quinzenal', MONTHLY: 'Mensal' }[routineData?.bathFrequency] ?? '—'}
+                    {' · '}
+                    {{ HOME: 'Em casa', PETSHOP: 'Petshop' }[routineData?.bathLocation] ?? '—'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-text-primary">Creche</span>
+                  <span className="text-xs font-medium text-text-secondary">
+                    {routineData?.hasDaycare ? (routineData.daycareName || 'Sim') : 'Não'}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center justify-center mt-3">
+                <span className="text-xs font-semibold text-primary">Editar rotina</span>
+                <ChevronRight size={14} className="text-primary ml-1" />
+              </div>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Premium Upsell */}
       {tutor.plan === 'free' && (
@@ -385,6 +593,238 @@ export default function Settings() {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Veterinarian Modal */}
+      <Modal open={vetModalOpen} onClose={() => setVetModalOpen(false)} title={editingVet ? 'Editar veterinário' : 'Adicionar veterinário'}>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-text-secondary mb-1.5">Nome <span className="text-danger">*</span></label>
+            <input
+              type="text"
+              value={vetForm.name}
+              onChange={(e) => setVetForm((f) => ({ ...f, name: e.target.value }))}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-surface text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              placeholder="Dr. João Silva"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-text-secondary mb-1.5">Clínica</label>
+            <input
+              type="text"
+              value={vetForm.clinic}
+              onChange={(e) => setVetForm((f) => ({ ...f, clinic: e.target.value }))}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-surface text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              placeholder="Clínica Pet Center"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-text-secondary mb-1.5">Telefone</label>
+              <input
+                type="tel"
+                value={vetForm.phone}
+                onChange={(e) => setVetForm((f) => ({ ...f, phone: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-surface text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                placeholder="(00) 00000-0000"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-text-secondary mb-1.5">Email</label>
+              <input
+                type="email"
+                value={vetForm.email}
+                onChange={(e) => setVetForm((f) => ({ ...f, email: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-surface text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                placeholder="vet@email.com"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-text-secondary mb-1.5">Especialidade</label>
+            <input
+              type="text"
+              value={vetForm.specialty}
+              onChange={(e) => setVetForm((f) => ({ ...f, specialty: e.target.value }))}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-surface text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              placeholder="Ex: Dermatologia, Ortopedia"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-text-secondary mb-1.5">Observações</label>
+            <textarea
+              value={vetForm.notes}
+              onChange={(e) => setVetForm((f) => ({ ...f, notes: e.target.value }))}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-surface text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none h-20"
+              placeholder="Notas adicionais..."
+            />
+          </div>
+          <button
+            onClick={saveVet}
+            disabled={!vetForm.name.trim()}
+            className="w-full py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary-dark active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {editingVet ? 'Salvar alterações' : 'Adicionar veterinário'}
+          </button>
+        </div>
+      </Modal>
+
+      {/* Delete Vet Confirmation Modal */}
+      <Modal open={!!deleteVetConfirm} onClose={() => setDeleteVetConfirm(null)} title="Remover veterinário">
+        {deleteVetConfirm && (
+          <div className="space-y-4">
+            <div className="bg-danger/5 border border-danger/20 rounded-xl p-4 flex gap-3">
+              <AlertTriangle size={20} className="text-danger shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-text-primary mb-1">
+                  Remover {deleteVetConfirm.name}?
+                </p>
+                <p className="text-xs text-text-secondary">
+                  As informações deste veterinário serão removidas permanentemente.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteVetConfirm(null)}
+                className="flex-1 py-3 rounded-xl border border-gray-200 text-text-secondary font-semibold text-sm hover:bg-surface active:scale-[0.98] transition-transform"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDeleteVet}
+                className="flex-1 py-3 rounded-xl bg-danger text-white font-semibold text-sm hover:bg-danger/90 active:scale-[0.98] transition-transform"
+              >
+                Remover
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Routine Modal */}
+      <Modal open={routineModalOpen} onClose={() => setRoutineModalOpen(false)} title="Rotina do pet">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-text-secondary mb-1.5">Passeios por dia</label>
+            <select
+              value={routineForm.walksPerDay}
+              onChange={(e) => setRoutineForm((f) => ({ ...f, walksPerDay: e.target.value }))}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-surface text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+            >
+              {[0, 1, 2, 3, 4, 5].map((n) => (
+                <option key={n} value={n}>{n}x ao dia</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-text-secondary mb-1.5">Duração do passeio (minutos)</label>
+            <input
+              type="number"
+              value={routineForm.walkDurationMinutes}
+              onChange={(e) => setRoutineForm((f) => ({ ...f, walkDurationMinutes: e.target.value }))}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-surface text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              placeholder="30"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-text-secondary mb-1.5">Frequência do banho</label>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { val: 'WEEKLY', label: 'Semanal' },
+                { val: 'BIWEEKLY', label: 'Quinzenal' },
+                { val: 'MONTHLY', label: 'Mensal' },
+              ].map(({ val, label }) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => setRoutineForm((f) => ({ ...f, bathFrequency: val }))}
+                  className={`p-3 rounded-xl border-2 text-center transition-all ${
+                    routineForm.bathFrequency === val
+                      ? 'border-primary bg-primary-50 text-primary shadow-sm'
+                      : 'border-gray-200 text-text-secondary hover:border-gray-300'
+                  }`}
+                >
+                  <p className="text-sm font-semibold">{label}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-text-secondary mb-1.5">Local do banho</label>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { val: 'HOME', label: 'Em casa' },
+                { val: 'PETSHOP', label: 'Petshop' },
+              ].map(({ val, label }) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => setRoutineForm((f) => ({ ...f, bathLocation: val }))}
+                  className={`p-3 rounded-xl border-2 text-center transition-all ${
+                    routineForm.bathLocation === val
+                      ? 'border-primary bg-primary-50 text-primary shadow-sm'
+                      : 'border-gray-200 text-text-secondary hover:border-gray-300'
+                  }`}
+                >
+                  <p className="text-sm font-semibold">{label}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-text-secondary mb-1.5">Frequenta creche?</label>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { val: true, label: 'Sim' },
+                { val: false, label: 'Não' },
+              ].map(({ val, label }) => (
+                <button
+                  key={String(val)}
+                  type="button"
+                  onClick={() => setRoutineForm((f) => ({ ...f, hasDaycare: val, ...(!val && { daycareName: '', daycarePhone: '' }) }))}
+                  className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all ${
+                    routineForm.hasDaycare === val
+                      ? 'border-primary bg-primary-50 text-primary shadow-sm shadow-primary/10'
+                      : 'border-gray-200 text-text-secondary hover:border-gray-300'
+                  }`}
+                >
+                  <span className="font-semibold text-sm">{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          {routineForm.hasDaycare && (
+            <div className="space-y-4 animate-fade-in-up">
+              <div>
+                <label className="block text-xs font-semibold text-text-secondary mb-1.5">Nome da creche</label>
+                <input
+                  type="text"
+                  value={routineForm.daycareName}
+                  onChange={(e) => setRoutineForm((f) => ({ ...f, daycareName: e.target.value }))}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-surface text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                  placeholder="Ex: PetDay"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-text-secondary mb-1.5">Telefone da creche</label>
+                <input
+                  type="tel"
+                  value={routineForm.daycarePhone}
+                  onChange={(e) => setRoutineForm((f) => ({ ...f, daycarePhone: e.target.value }))}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-surface text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                  placeholder="(00) 00000-0000"
+                />
+              </div>
+            </div>
+          )}
+          <button
+            onClick={saveRoutine}
+            className="w-full py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary-dark active:scale-[0.98] transition-transform"
+          >
+            Salvar rotina
+          </button>
+        </div>
       </Modal>
     </div>
   );
