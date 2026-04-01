@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePet } from '../context/PetContext';
 import { usePetsMutations } from '../hooks/usePets';
@@ -6,6 +6,7 @@ import {
   Dog, Cat, ChevronRight, ChevronLeft, Camera, X, Plus, PawPrint,
   Heart, Sparkles, Check,
 } from 'lucide-react';
+import { dogBreeds, catBreeds } from '../data/breeds';
 
 const STEPS = [
   { label: 'Identidade', emoji: '🐾' },
@@ -32,6 +33,10 @@ export default function Onboarding() {
     allergies: [],
     conditions: '',
     microchip: '',
+    neutered: false,
+    neuteredDate: '',
+    hasAllergies: false,
+    hasConditions: false,
     foodBrand: '',
     foodType: 'dry',
     portionGrams: '',
@@ -41,6 +46,26 @@ export default function Onboarding() {
 
   const [allergyInput, setAllergyInput] = useState('');
   const [errors, setErrors] = useState({});
+  const [breedQuery, setBreedQuery] = useState('');
+  const [showBreedDropdown, setShowBreedDropdown] = useState(false);
+  const breedRef = useRef(null);
+
+  // Close breed dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (breedRef.current && !breedRef.current.contains(e.target)) {
+        setShowBreedDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // Reset breed when species changes
+  useEffect(() => {
+    set('breed', '');
+    setBreedQuery('');
+  }, [form.species]);
 
   const set = (key, val) => {
     setForm((p) => ({ ...p, [key]: val }));
@@ -73,11 +98,31 @@ export default function Onboarding() {
     }
   };
 
+  // Breed autocomplete logic
+  const breedList = form.species === 'dog' ? dogBreeds : catBreeds;
+  const filteredBreeds = breedQuery.trim()
+    ? breedList.filter((b) => b.toLowerCase().includes(breedQuery.toLowerCase()))
+    : breedList;
+
+  const selectBreed = (breed) => {
+    set('breed', breed);
+    setBreedQuery(breed);
+    setShowBreedDropdown(false);
+  };
+
+  const handleBreedInput = (val) => {
+    setBreedQuery(val);
+    setShowBreedDropdown(true);
+    // Only set breed if it exactly matches a list entry
+    const exact = breedList.find((b) => b.toLowerCase() === val.toLowerCase());
+    set('breed', exact || '');
+  };
+
   const validateStep = () => {
     const newErrors = {};
     if (step === 0) {
       if (!form.name.trim()) newErrors.name = true;
-      if (!form.breed.trim()) newErrors.breed = true;
+      if (!form.breed) newErrors.breed = true;
       if (!form.birthDate) newErrors.birthDate = true;
       else if (new Date(form.birthDate) > new Date()) newErrors.birthDate = 'future';
     } else if (step === 1) {
@@ -115,6 +160,10 @@ export default function Onboarding() {
       allergies: form.allergies.length ? form.allergies : undefined,
       conditions: form.conditions ? [form.conditions] : undefined,
       microchip: form.microchip || undefined,
+      neutered: form.neutered,
+      neuteredDate: form.neutered && form.neuteredDate
+        ? new Date(form.neuteredDate).toISOString()
+        : undefined,
     };
 
     createPet.mutate(petData, {
@@ -138,6 +187,29 @@ export default function Onboarding() {
     `w-full bg-surface rounded-xl border px-4 py-3 text-sm text-text-primary placeholder:text-gray-400 focus:outline-none transition-all ${
       errors[key] ? 'border-danger ring-2 ring-danger/20' : 'border-gray-200'
     }`;
+
+  // Reusable toggle button pair
+  const ToggleButtons = ({ value, onToggle, labelYes = 'Sim', labelNo = 'Não' }) => (
+    <div className="grid grid-cols-2 gap-3">
+      {[
+        { val: true, label: labelYes },
+        { val: false, label: labelNo },
+      ].map(({ val, label }) => (
+        <button
+          key={String(val)}
+          type="button"
+          onClick={() => onToggle(val)}
+          className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all ${
+            value === val
+              ? 'border-primary bg-primary-50 text-primary shadow-sm shadow-primary/10'
+              : 'border-gray-200 text-text-secondary hover:border-gray-300'
+          }`}
+        >
+          <span className="font-semibold text-sm">{label}</span>
+        </button>
+      ))}
+    </div>
+  );
 
   const stepContent = (
     <div
@@ -206,17 +278,32 @@ export default function Onboarding() {
             </div>
           </div>
 
-          <div>
+          {/* Breed Autocomplete */}
+          <div ref={breedRef} className="relative">
             <label className="block text-xs font-semibold text-text-secondary mb-1.5">
               Raça <span className="text-danger">*</span>
             </label>
             <input
               className={inputClass('breed')}
-              placeholder="Ex: Golden Retriever"
-              value={form.breed}
-              onChange={(e) => set('breed', e.target.value)}
+              placeholder={form.species === 'dog' ? 'Ex: Golden Retriever' : 'Ex: Siamês'}
+              value={breedQuery}
+              onChange={(e) => handleBreedInput(e.target.value)}
+              onFocus={() => setShowBreedDropdown(true)}
             />
-            {errors.breed && <p className="text-xs text-danger mt-1">Informe a raça</p>}
+            {showBreedDropdown && filteredBreeds.length > 0 && (
+              <ul className="absolute z-20 left-0 right-0 mt-1 bg-surface-alt rounded-xl shadow-lg max-h-48 overflow-y-auto border border-gray-100">
+                {filteredBreeds.map((breed) => (
+                  <li
+                    key={breed}
+                    onClick={() => selectBreed(breed)}
+                    className="py-2 px-4 text-sm text-text-primary hover:bg-primary-50 cursor-pointer transition-colors"
+                  >
+                    {breed}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {errors.breed && <p className="text-xs text-danger mt-1">Selecione uma raça da lista</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -265,50 +352,81 @@ export default function Onboarding() {
             {errors.weight && <p className="text-xs text-danger mt-1">Informe um peso válido (maior que 0)</p>}
           </div>
 
+          {/* Allergies toggle */}
           <div>
-            <label className="block text-xs font-semibold text-text-secondary mb-1.5">Alergias conhecidas</label>
-            <div className="flex gap-2">
-              <input
-                className={`${inputClass('')} flex-1`}
-                placeholder="Digite e pressione adicionar"
-                value={allergyInput}
-                onChange={(e) => setAllergyInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addAllergy())}
-              />
-              <button
-                type="button"
-                onClick={addAllergy}
-                className="px-4 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-95 transition-transform"
-              >
-                <Plus size={18} />
-              </button>
-            </div>
-            {form.allergies.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2.5">
-                {form.allergies.map((a, i) => (
-                  <span
-                    key={i}
-                    className="inline-flex items-center gap-1.5 bg-warning-light text-warning px-3 py-1.5 rounded-full text-xs font-semibold animate-scale-in"
-                  >
-                    {a}
-                    <button type="button" onClick={() => removeAllergy(i)} className="hover:text-danger transition-colors">
-                      <X size={12} />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-text-secondary mb-1.5">Condições crônicas</label>
-            <textarea
-              className={`${inputClass('')} resize-none h-20`}
-              placeholder="Descreva condições de saúde relevantes..."
-              value={form.conditions}
-              onChange={(e) => set('conditions', e.target.value)}
+            <label className="block text-xs font-semibold text-text-secondary mb-1.5">Tem alergias conhecidas?</label>
+            <ToggleButtons
+              value={form.hasAllergies}
+              onToggle={(val) => {
+                set('hasAllergies', val);
+                if (!val) {
+                  set('allergies', []);
+                  setAllergyInput('');
+                }
+              }}
             />
           </div>
+
+          {form.hasAllergies && (
+            <div className="animate-fade-in-up">
+              <label className="block text-xs font-semibold text-text-secondary mb-1.5">Alergias</label>
+              <div className="flex gap-2">
+                <input
+                  className={`${inputClass('')} flex-1`}
+                  placeholder="Digite e pressione adicionar"
+                  value={allergyInput}
+                  onChange={(e) => setAllergyInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addAllergy())}
+                />
+                <button
+                  type="button"
+                  onClick={addAllergy}
+                  className="px-4 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-95 transition-transform"
+                >
+                  <Plus size={18} />
+                </button>
+              </div>
+              {form.allergies.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2.5">
+                  {form.allergies.map((a, i) => (
+                    <span
+                      key={i}
+                      className="inline-flex items-center gap-1.5 bg-warning-light text-warning px-3 py-1.5 rounded-full text-xs font-semibold animate-scale-in"
+                    >
+                      {a}
+                      <button type="button" onClick={() => removeAllergy(i)} className="hover:text-danger transition-colors">
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Conditions toggle */}
+          <div>
+            <label className="block text-xs font-semibold text-text-secondary mb-1.5">Tem condições crônicas?</label>
+            <ToggleButtons
+              value={form.hasConditions}
+              onToggle={(val) => {
+                set('hasConditions', val);
+                if (!val) set('conditions', '');
+              }}
+            />
+          </div>
+
+          {form.hasConditions && (
+            <div className="animate-fade-in-up">
+              <label className="block text-xs font-semibold text-text-secondary mb-1.5">Condições crônicas</label>
+              <textarea
+                className={`${inputClass('')} resize-none h-20`}
+                placeholder="Descreva condições de saúde relevantes..."
+                value={form.conditions}
+                onChange={(e) => set('conditions', e.target.value)}
+              />
+            </div>
+          )}
 
           <div>
             <label className="block text-xs font-semibold text-text-secondary mb-1.5">Microchip (opcional)</label>
@@ -319,6 +437,32 @@ export default function Onboarding() {
               onChange={(e) => set('microchip', e.target.value)}
             />
           </div>
+
+          {/* Neutered toggle */}
+          <div>
+            <label className="block text-xs font-semibold text-text-secondary mb-1.5">
+              É castrado(a)?
+            </label>
+            <ToggleButtons
+              value={form.neutered}
+              onToggle={(val) => {
+                set('neutered', val);
+                if (!val) set('neuteredDate', '');
+              }}
+            />
+          </div>
+
+          {form.neutered && (
+            <div className="animate-fade-in-up">
+              <label className="block text-xs font-semibold text-text-secondary mb-1.5">Data da castração</label>
+              <input
+                type="date"
+                className={inputClass('')}
+                value={form.neuteredDate}
+                onChange={(e) => set('neuteredDate', e.target.value)}
+              />
+            </div>
+          )}
         </div>
       )}
 
