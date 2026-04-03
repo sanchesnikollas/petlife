@@ -1,0 +1,41 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // .tool_response.filePath // empty' | { read -r f; [[ \"$f\" == *.jsx ]] || [[ \"$f\" == *.js ]] || [[ \"$f\" == *.css ]] && cd /Users/nikollasanches/Documents/petlife && npm run build --silent 2>&1 | tail -3; } 2>/dev/null || true",
+            "timeout": 30,
+            "statusMessage": "Verificando build..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "You are a QA verification agent for PetLife. Before this session ends, verify:\n\n1. Run `npm run build` in ~/Documents/petlife/ — does it pass?\n2. If code was changed, check that the API is still healthy: `curl -sf https://petlife-api-production-d707.up.railway.app/health`\n3. If any React hooks were created or modified in src/hooks/, verify they all use `.then(r => r.data)` pattern (grep for queryFn and mutationFn without .then)\n4. If Onboarding.jsx was modified, verify the species is sent as uppercase (DOG/CAT) and dates as ISO strings\n\nReport what you found. If there are issues, output JSON: {\"continue\":false,\"stopReason\":\"Found issues: <details>\"}\nIf all good, output: {\"hookSpecificOutput\":{\"hookEventName\":\"Stop\",\"additionalContext\":\"QA passed: build ok, API healthy, hooks consistent\"}}",
+            "timeout": 60,
+            "statusMessage": "Agente QA verificando qualidade..."
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "manual|auto",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"systemMessage\":\"PRESERVE: PetLife project context — Backend API at petlife-api-production-d707.up.railway.app, Frontend at amusing-creativity-production-295a.up.railway.app. React Query hooks MUST use .then(r => r.data). API returns { data: ... } format. Carolina (sócia) P0/P1 features. Auth uses refreshToken in body (not cookies). PetProvider only mounts after auth.\"}'",
+            "statusMessage": "Preservando contexto PetLife..."
+          }
+        ]
+      }
+    ]
+  }
+}
