@@ -1,0 +1,121 @@
+[
+  { "brand": "Royal Canin", "line": "Mini Puppy", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "MINI", "kcalPer100g": 398, "proteinPct": 27, "fatPct": 17, "fiberPct": 2.4, "moisturePct": 10 },
+  { "brand": "Royal Canin", "line": "Mini Adult", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "MINI", "kcalPer100g": 386, "proteinPct": 25, "fatPct": 14, "fiberPct": 1.9, "moisturePct": 10 },
+  { "brand": "Royal Canin", "line": "Medium Puppy", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "MEDIUM", "kcalPer100g": 400, "proteinPct": 32, "fatPct": 20, "fiberPct": 1.4, "moisturePct": 10 },
+  { "brand": "Royal Canin", "line": "Medium Adult", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "MEDIUM", "kcalPer100g": 370, "proteinPct": 25, "fatPct": 14, "fiberPct": 1.4, "moisturePct": 10 },
+  { "brand": "Royal Canin", "line": "Medium Adult 7+", "type": "DRY", "species": "DOG", "ageRange": "SENIOR", "sizeRange": "MEDIUM", "kcalPer100g": 371, "proteinPct": 25, "fatPct": 14, "fiberPct": 2.6, "moisturePct": 10 },
+  { "brand": "Royal Canin", "line": "Maxi Puppy", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "LARGE", "kcalPer100g": 375, "proteinPct": 30, "fatPct": 16, "fiberPct": 1.4, "moisturePct": 10 },
+  { "brand": "Royal Canin", "line": "Maxi Adult", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "LARGE", "kcalPer100g": 361, "proteinPct": 26, "fatPct": 14, "fiberPct": 2.7, "moisturePct": 10 },
+  { "brand": "Royal Canin", "line": "Giant Adult", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "GIANT", "kcalPer100g": 355, "proteinPct": 26, "fatPct": 14, "fiberPct": 1.9, "moisturePct": 10 },
+  { "brand": "Royal Canin", "line": "Kitten", "type": "DRY", "species": "CAT", "ageRange": "PUPPY", "sizeRange": "ALL_SIZES", "kcalPer100g": 419, "proteinPct": 32, "fatPct": 20, "fiberPct": 4.6, "moisturePct": 10 },
+  { "brand": "Royal Canin", "line": "Indoor", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 374, "proteinPct": 27, "fatPct": 13, "fiberPct": 6.5, "moisturePct": 10 },
+  { "brand": "Royal Canin", "line": "Sterilised", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 363, "proteinPct": 37, "fatPct": 12, "fiberPct": 4.8, "moisturePct": 10 },
+  { "brand": "Royal Canin", "line": "Senior 12+", "type": "DRY", "species": "CAT", "ageRange": "SENIOR", "sizeRange": "ALL_SIZES", "kcalPer100g": 389, "proteinPct": 30, "fatPct": 13, "fiberPct": 5.6, "moisturePct": 10 },
+
+  { "brand": "Premier Pet", "line": "Golden Formula Puppy Raças Pequenas", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "SMALL", "kcalPer100g": 420, "proteinPct": 28, "fatPct": 17, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Premier Pet", "line": "Golden Formula Adulto Raças Pequenas", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "SMALL", "kcalPer100g": 405, "proteinPct": 25, "fatPct": 15, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Premier Pet", "line": "Golden Formula Adulto Raças Médias", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "MEDIUM", "kcalPer100g": 395, "proteinPct": 24, "fatPct": 14, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Premier Pet", "line": "Golden Formula Adulto Raças Grandes", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "LARGE", "kcalPer100g": 380, "proteinPct": 23, "fatPct": 12, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Premier Pet", "line": "Golden Formula Sênior", "type": "DRY", "species": "DOG", "ageRange": "SENIOR", "sizeRange": "ALL_SIZES", "kcalPer100g": 360, "proteinPct": 22, "fatPct": 10, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Premier Pet", "line": "Ambientes Internos Gatos", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 380, "proteinPct": 32, "fatPct": 12, "fiberPct": 5, "moisturePct": 10 },
+  { "brand": "Premier Pet", "line": "Gatos Castrados", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 355, "proteinPct": 32, "fatPct": 10, "fiberPct": 6, "moisturePct": 10 },
+  { "brand": "Premier Pet", "line": "Gatitos", "type": "DRY", "species": "CAT", "ageRange": "PUPPY", "sizeRange": "ALL_SIZES", "kcalPer100g": 420, "proteinPct": 36, "fatPct": 18, "fiberPct": 4, "moisturePct": 10 },
+
+  { "brand": "Premier Nutrição Clínica", "line": "Obesidade Cães", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 310, "proteinPct": 30, "fatPct": 8, "fiberPct": 10, "moisturePct": 10 },
+  { "brand": "Premier Nutrição Clínica", "line": "Hipoalergênico Cães", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 380, "proteinPct": 22, "fatPct": 13, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Premier Nutrição Clínica", "line": "Gastrointestinal Cães", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 395, "proteinPct": 24, "fatPct": 15, "fiberPct": 3, "moisturePct": 10 },
+
+  { "brand": "Golden", "line": "Fórmula Filhotes Raças Médias e Grandes", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "MEDIUM", "kcalPer100g": 410, "proteinPct": 28, "fatPct": 14, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Golden", "line": "Fórmula Adultos Raças Médias e Grandes", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "MEDIUM", "kcalPer100g": 390, "proteinPct": 24, "fatPct": 12, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Golden", "line": "Fórmula Adultos Raças Pequenas", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "SMALL", "kcalPer100g": 400, "proteinPct": 25, "fatPct": 14, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Golden", "line": "Fórmula Sênior", "type": "DRY", "species": "DOG", "ageRange": "SENIOR", "sizeRange": "ALL_SIZES", "kcalPer100g": 370, "proteinPct": 22, "fatPct": 10, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Golden", "line": "Fórmula Gatos Adultos", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 385, "proteinPct": 32, "fatPct": 12, "fiberPct": 5, "moisturePct": 10 },
+  { "brand": "Golden", "line": "Fórmula Gatitos", "type": "DRY", "species": "CAT", "ageRange": "PUPPY", "sizeRange": "ALL_SIZES", "kcalPer100g": 415, "proteinPct": 35, "fatPct": 18, "fiberPct": 4, "moisturePct": 10 },
+
+  { "brand": "Magnus", "line": "Todo Dia Filhotes", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "ALL_SIZES", "kcalPer100g": 385, "proteinPct": 25, "fatPct": 12, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Magnus", "line": "Todo Dia Adultos", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 370, "proteinPct": 21, "fatPct": 10, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Magnus", "line": "Premium Adultos", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 385, "proteinPct": 23, "fatPct": 12, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Magnus", "line": "Gatos Adultos", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 380, "proteinPct": 30, "fatPct": 11, "fiberPct": 5, "moisturePct": 10 },
+
+  { "brand": "Pedigree", "line": "Filhotes Raças Pequenas", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "SMALL", "kcalPer100g": 395, "proteinPct": 25, "fatPct": 13, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Pedigree", "line": "Filhotes Raças Médias", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "MEDIUM", "kcalPer100g": 400, "proteinPct": 25, "fatPct": 13, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Pedigree", "line": "Adultos Raças Pequenas", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "SMALL", "kcalPer100g": 370, "proteinPct": 22, "fatPct": 10, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Pedigree", "line": "Adultos Raças Médias", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "MEDIUM", "kcalPer100g": 375, "proteinPct": 22, "fatPct": 10, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Pedigree", "line": "Adultos Raças Grandes", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "LARGE", "kcalPer100g": 365, "proteinPct": 22, "fatPct": 10, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Pedigree", "line": "Sênior 7+", "type": "DRY", "species": "DOG", "ageRange": "SENIOR", "sizeRange": "ALL_SIZES", "kcalPer100g": 350, "proteinPct": 20, "fatPct": 8, "fiberPct": 5, "moisturePct": 10 },
+
+  { "brand": "Whiskas", "line": "Filhotes", "type": "DRY", "species": "CAT", "ageRange": "PUPPY", "sizeRange": "ALL_SIZES", "kcalPer100g": 395, "proteinPct": 32, "fatPct": 12, "fiberPct": 3.5, "moisturePct": 10 },
+  { "brand": "Whiskas", "line": "Adultos Carne", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 365, "proteinPct": 28, "fatPct": 10, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Whiskas", "line": "Adultos Peixe", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 365, "proteinPct": 28, "fatPct": 10, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Whiskas", "line": "Sênior 7+", "type": "DRY", "species": "CAT", "ageRange": "SENIOR", "sizeRange": "ALL_SIZES", "kcalPer100g": 355, "proteinPct": 28, "fatPct": 9, "fiberPct": 5, "moisturePct": 10 },
+
+  { "brand": "Hill's Science Diet", "line": "Puppy Small Bites", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "SMALL", "kcalPer100g": 420, "proteinPct": 28, "fatPct": 18, "fiberPct": 3, "moisturePct": 9 },
+  { "brand": "Hill's Science Diet", "line": "Adult Perfect Weight", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 300, "proteinPct": 26, "fatPct": 9, "fiberPct": 10, "moisturePct": 9 },
+  { "brand": "Hill's Science Diet", "line": "Adult 7+", "type": "DRY", "species": "DOG", "ageRange": "SENIOR", "sizeRange": "ALL_SIZES", "kcalPer100g": 370, "proteinPct": 20, "fatPct": 13, "fiberPct": 3, "moisturePct": 9 },
+  { "brand": "Hill's Science Diet", "line": "Kitten", "type": "DRY", "species": "CAT", "ageRange": "PUPPY", "sizeRange": "ALL_SIZES", "kcalPer100g": 445, "proteinPct": 33, "fatPct": 22, "fiberPct": 2, "moisturePct": 9 },
+  { "brand": "Hill's Science Diet", "line": "Adult Indoor", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 385, "proteinPct": 32, "fatPct": 15, "fiberPct": 5, "moisturePct": 9 },
+  { "brand": "Hill's Science Diet", "line": "Adult 7+", "type": "DRY", "species": "CAT", "ageRange": "SENIOR", "sizeRange": "ALL_SIZES", "kcalPer100g": 395, "proteinPct": 32, "fatPct": 16, "fiberPct": 3, "moisturePct": 9 },
+
+  { "brand": "Quatree Mega Natural", "line": "Filhotes Raças Pequenas", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "SMALL", "kcalPer100g": 420, "proteinPct": 28, "fatPct": 16, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Quatree Mega Natural", "line": "Adultos Raças Médias", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "MEDIUM", "kcalPer100g": 390, "proteinPct": 25, "fatPct": 13, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Quatree Mega Natural", "line": "Gatos Adultos", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 380, "proteinPct": 30, "fatPct": 11, "fiberPct": 5, "moisturePct": 10 },
+
+  { "brand": "Guabi Natural", "line": "Cães Filhotes", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "ALL_SIZES", "kcalPer100g": 415, "proteinPct": 27, "fatPct": 15, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Guabi Natural", "line": "Cães Adultos Raças Médias", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "MEDIUM", "kcalPer100g": 385, "proteinPct": 23, "fatPct": 12, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Guabi Natural", "line": "Gatos Adultos", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 375, "proteinPct": 30, "fatPct": 11, "fiberPct": 5, "moisturePct": 10 },
+
+  { "brand": "Biofresh", "line": "Cães Filhotes Pequenos e Médios", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "SMALL", "kcalPer100g": 425, "proteinPct": 30, "fatPct": 18, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Biofresh", "line": "Cães Adultos Pequenos", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "SMALL", "kcalPer100g": 400, "proteinPct": 26, "fatPct": 14, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Biofresh", "line": "Cães Adultos Médios e Grandes", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "LARGE", "kcalPer100g": 395, "proteinPct": 25, "fatPct": 13, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Biofresh", "line": "Gatos Adultos", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 385, "proteinPct": 32, "fatPct": 12, "fiberPct": 5, "moisturePct": 10 },
+
+  { "brand": "Farmina N&D", "line": "Ancestral Grain Puppy Mini", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "MINI", "kcalPer100g": 412, "proteinPct": 30, "fatPct": 20, "fiberPct": 1.9, "moisturePct": 9 },
+  { "brand": "Farmina N&D", "line": "Ancestral Grain Adult Mini", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "MINI", "kcalPer100g": 398, "proteinPct": 28, "fatPct": 18, "fiberPct": 2.2, "moisturePct": 9 },
+  { "brand": "Farmina N&D", "line": "Prime Adult Chicken", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 395, "proteinPct": 40, "fatPct": 18, "fiberPct": 2, "moisturePct": 8 },
+
+  { "brand": "Makenna", "line": "Filhotes Pequenos", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "SMALL", "kcalPer100g": 405, "proteinPct": 27, "fatPct": 15, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Makenna", "line": "Adultos Pequenos", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "SMALL", "kcalPer100g": 390, "proteinPct": 24, "fatPct": 13, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Makenna", "line": "Gatos Adultos", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 375, "proteinPct": 30, "fatPct": 11, "fiberPct": 5, "moisturePct": 10 },
+
+  { "brand": "GranPlus Menu", "line": "Adultos Carne", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 365, "proteinPct": 21, "fatPct": 9, "fiberPct": 5, "moisturePct": 10 },
+  { "brand": "GranPlus Menu", "line": "Filhotes", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "ALL_SIZES", "kcalPer100g": 380, "proteinPct": 25, "fatPct": 11, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "GranPlus Menu", "line": "Gatos Adultos", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 370, "proteinPct": 28, "fatPct": 10, "fiberPct": 5, "moisturePct": 10 },
+
+  { "brand": "Special Dog", "line": "Premium Filhotes", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "ALL_SIZES", "kcalPer100g": 380, "proteinPct": 25, "fatPct": 12, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Special Dog", "line": "Premium Adultos", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 365, "proteinPct": 21, "fatPct": 10, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Special Cat", "line": "Premium Adultos", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 365, "proteinPct": 28, "fatPct": 10, "fiberPct": 5, "moisturePct": 10 },
+
+  { "brand": "Max", "line": "Filhotes", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "ALL_SIZES", "kcalPer100g": 370, "proteinPct": 24, "fatPct": 11, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Max", "line": "Adultos", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 355, "proteinPct": 20, "fatPct": 9, "fiberPct": 5, "moisturePct": 10 },
+
+  { "brand": "Dog Chow", "line": "Filhotes", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "ALL_SIZES", "kcalPer100g": 390, "proteinPct": 28, "fatPct": 13, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Dog Chow", "line": "Adultos Raças Pequenas", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "SMALL", "kcalPer100g": 380, "proteinPct": 24, "fatPct": 12, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Dog Chow", "line": "Adultos Raças Médias e Grandes", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "MEDIUM", "kcalPer100g": 370, "proteinPct": 22, "fatPct": 10, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Dog Chow", "line": "Sênior", "type": "DRY", "species": "DOG", "ageRange": "SENIOR", "sizeRange": "ALL_SIZES", "kcalPer100g": 355, "proteinPct": 20, "fatPct": 9, "fiberPct": 5, "moisturePct": 10 },
+
+  { "brand": "Cat Chow", "line": "Filhotes", "type": "DRY", "species": "CAT", "ageRange": "PUPPY", "sizeRange": "ALL_SIZES", "kcalPer100g": 395, "proteinPct": 32, "fatPct": 13, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Cat Chow", "line": "Adultos Carne", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 375, "proteinPct": 30, "fatPct": 11, "fiberPct": 5, "moisturePct": 10 },
+  { "brand": "Cat Chow", "line": "Castrados", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 355, "proteinPct": 32, "fatPct": 9, "fiberPct": 6, "moisturePct": 10 },
+
+  { "brand": "Nutrium", "line": "Cães Adultos", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 380, "proteinPct": 23, "fatPct": 12, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Nutrium", "line": "Gatos Adultos", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 370, "proteinPct": 29, "fatPct": 11, "fiberPct": 5, "moisturePct": 10 },
+
+  { "brand": "Formula Natural", "line": "Cães Filhotes", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "ALL_SIZES", "kcalPer100g": 400, "proteinPct": 26, "fatPct": 14, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Formula Natural", "line": "Cães Adultos Médios", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "MEDIUM", "kcalPer100g": 385, "proteinPct": 23, "fatPct": 12, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Formula Natural", "line": "Gatos Adultos", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 380, "proteinPct": 30, "fatPct": 11, "fiberPct": 5, "moisturePct": 10 },
+
+  { "brand": "Equilíbrio", "line": "Puppy Small", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "SMALL", "kcalPer100g": 410, "proteinPct": 28, "fatPct": 15, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Equilíbrio", "line": "Adult Small", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "SMALL", "kcalPer100g": 395, "proteinPct": 24, "fatPct": 13, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Equilíbrio", "line": "Adult Medium", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "MEDIUM", "kcalPer100g": 385, "proteinPct": 23, "fatPct": 12, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Equilíbrio", "line": "Gatos Adultos", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 380, "proteinPct": 32, "fatPct": 12, "fiberPct": 5, "moisturePct": 10 },
+
+  { "brand": "Three Dogs", "line": "Adultos Raças Grandes", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "LARGE", "kcalPer100g": 375, "proteinPct": 22, "fatPct": 11, "fiberPct": 4, "moisturePct": 10 },
+  { "brand": "Three Dogs", "line": "Filhotes Raças Grandes", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "LARGE", "kcalPer100g": 390, "proteinPct": 25, "fatPct": 13, "fiberPct": 3, "moisturePct": 10 },
+
+  { "brand": "Faro", "line": "Cães Adultos", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 360, "proteinPct": 20, "fatPct": 9, "fiberPct": 5, "moisturePct": 10 },
+  { "brand": "Faro", "line": "Gatos Adultos", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 360, "proteinPct": 27, "fatPct": 10, "fiberPct": 5, "moisturePct": 10 },
+
+  { "brand": "Nero Gold", "line": "Adult Maintenance Dog", "type": "DRY", "species": "DOG", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 400, "proteinPct": 27, "fatPct": 15, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Nero Gold", "line": "Puppy Sensitive", "type": "DRY", "species": "DOG", "ageRange": "PUPPY", "sizeRange": "ALL_SIZES", "kcalPer100g": 420, "proteinPct": 30, "fatPct": 18, "fiberPct": 3, "moisturePct": 10 },
+  { "brand": "Nero Gold", "line": "Gatos Adultos", "type": "DRY", "species": "CAT", "ageRange": "ADULT", "sizeRange": "ALL_SIZES", "kcalPer100g": 395, "proteinPct": 33, "fatPct": 16, "fiberPct": 4, "moisturePct": 10 }
+]

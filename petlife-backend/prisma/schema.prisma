@@ -1,0 +1,528 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Plan {
+  FREE
+  PREMIUM
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+  APPLE
+}
+
+enum Species {
+  DOG
+  CAT
+}
+
+enum Sex {
+  MALE
+  FEMALE
+}
+
+enum FoodType {
+  DRY
+  WET
+  RAW
+  HOMEMADE
+  MIXED
+}
+
+enum AgeRange {
+  PUPPY
+  ADULT
+  SENIOR
+  ALL_AGES
+}
+
+enum SizeRange {
+  MINI
+  SMALL
+  MEDIUM
+  LARGE
+  GIANT
+  ALL_SIZES
+}
+
+enum HealthStatus {
+  OK
+  DUE_SOON
+  OVERDUE
+}
+
+enum RecordType {
+  VACCINE
+  DEWORMING
+  MEDICATION
+  CONSULTATION
+  EXAM
+  SURGERY
+  NOTE
+}
+
+enum GroupCategory {
+  BREED
+  CITY
+  TOPIC
+}
+
+enum ReportTargetType {
+  POST
+  COMMENT
+  USER
+}
+
+enum ReportStatus {
+  OPEN
+  REVIEWED
+  ACCEPTED
+  REJECTED
+}
+
+enum DevicePlatform {
+  IOS
+  ANDROID
+  WEB
+}
+
+model User {
+  id               String         @id @default(cuid())
+  name             String
+  email            String         @unique
+  passwordHash     String
+  phone            String?
+  avatarUrl        String?
+  plan             Plan           @default(FREE)
+  provider         AuthProvider   @default(EMAIL)
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  refreshToken     String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  deletedAt        DateTime?
+
+  pets             Pet[]
+  reminderConfig   ReminderConfig?
+  veterinarians    Veterinarian[]
+  posts            Post[]
+  comments         PostComment[]
+  likes            PostLike[]
+  groupMemberships GroupMember[]
+  reportsMade      Report[]        @relation("ReportsMade")
+  blocks           UserBlock[]     @relation("BlocksMade")
+  blockedBy        UserBlock[]     @relation("BlocksReceived")
+  deviceTokens     DeviceToken[]
+  pushSent         PushSent[]
+
+  @@map("users")
+}
+
+model Pet {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  species     Species
+  breed       String?
+  birthDate   DateTime?
+  sex         Sex?
+  weight      Float?
+  photo       String?
+  allergies   String[]
+  conditions  String[]
+  microchip    String?
+  neutered     Boolean   @default(false)
+  neuteredDate DateTime?
+  activityLevel  String?
+  healthPlan     String?
+  healthPlanNumber String?
+  createdAt    DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  foodConfig   FoodConfig?
+  vaccines     Vaccine[]
+  dewormings   Deworming[]
+  medications  Medication[]
+  consultations Consultation[]
+  weightEntries WeightEntry[]
+  mealLogs     MealLog[]
+  records      Record[]
+  routine      PetRoutine?
+
+  @@index([userId])
+  @@map("pets")
+}
+
+model FoodConfig {
+  id           String   @id @default(cuid())
+  petId        String   @unique
+  brand        String?
+  line         String?
+  type         FoodType @default(DRY)
+  portionGrams Float?
+  mealsPerDay  Int      @default(2)
+  schedule     String[] @default([])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@map("food_configs")
+}
+
+model Vaccine {
+  id       String    @id @default(cuid())
+  petId    String
+  name     String
+  lastDone DateTime
+  nextDue  DateTime?
+  clinic   String?
+  vet      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@index([petId])
+  @@map("vaccines")
+}
+
+model Deworming {
+  id       String    @id @default(cuid())
+  petId    String
+  name     String
+  product  String?
+  lastDone DateTime
+  nextDue  DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@index([petId])
+  @@map("dewormings")
+}
+
+model Medication {
+  id        String    @id @default(cuid())
+  petId     String
+  name      String
+  dose      String?
+  frequency String?
+  startDate DateTime
+  duration  String?
+  nextDue   DateTime?
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@index([petId])
+  @@map("medications")
+}
+
+model Consultation {
+  id        String   @id @default(cuid())
+  petId     String
+  date      DateTime
+  type      String?
+  clinic    String?
+  vet       String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@index([petId])
+  @@map("consultations")
+}
+
+model WeightEntry {
+  id        String   @id @default(cuid())
+  petId     String
+  date      DateTime
+  value     Float
+  createdAt DateTime @default(now())
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@index([petId])
+  @@map("weight_entries")
+}
+
+model MealLog {
+  id        String   @id @default(cuid())
+  petId     String
+  date      DateTime
+  time      String
+  given     Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@index([petId, date])
+  @@map("meal_logs")
+}
+
+model Record {
+  id          String     @id @default(cuid())
+  petId       String
+  date        DateTime
+  type        RecordType
+  title       String
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  pet         Pet          @relation(fields: [petId], references: [id], onDelete: Cascade)
+  attachments Attachment[]
+
+  @@index([petId, type])
+  @@index([petId, date])
+  @@map("records")
+}
+
+model Attachment {
+  id        String   @id @default(cuid())
+  recordId  String
+  filename  String
+  url       String
+  mimeType  String
+  size      Int
+  createdAt DateTime @default(now())
+
+  record Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
+
+  @@index([recordId])
+  @@map("attachments")
+}
+
+model ReminderConfig {
+  id            String  @id @default(cuid())
+  userId        String  @unique
+  vaccines      Boolean @default(true)
+  medications   Boolean @default(true)
+  food          Boolean @default(true)
+  consultations Boolean @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("reminder_configs")
+}
+
+model Veterinarian {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  clinic    String?
+  phone     String?
+  email     String?
+  specialty String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("veterinarians")
+}
+
+model PetRoutine {
+  id              String   @id @default(cuid())
+  petId           String   @unique
+  walksPerDay     Int?
+  walkDuration    Int?
+  daycare         Boolean  @default(false)
+  daycareName     String?
+  daycarePhone    String?
+  bathFrequency   String?
+  bathLocation    String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@map("pet_routines")
+}
+
+model FoodBrand {
+  id             String    @id @default(cuid())
+  brand          String
+  line           String
+  type           FoodType
+  species        Species
+  ageRange       AgeRange  @default(ALL_AGES)
+  sizeRange      SizeRange @default(ALL_SIZES)
+  kcalPer100g    Float
+  proteinPct     Float?
+  fatPct         Float?
+  fiberPct       Float?
+  moisturePct    Float?
+  brazilianBrand Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([species, type])
+  @@index([brand])
+  @@map("food_brands")
+}
+
+model Group {
+  id           String        @id @default(cuid())
+  slug         String        @unique
+  name         String
+  emoji        String?
+  description  String?
+  category     GroupCategory
+  membersCount Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  members GroupMember[]
+  posts   Post[]
+
+  @@index([category])
+  @@map("groups")
+}
+
+model GroupMember {
+  userId   String
+  groupId  String
+  joinedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([userId, groupId])
+  @@index([groupId])
+  @@map("group_members")
+}
+
+model Post {
+  id            String   @id @default(cuid())
+  authorId      String
+  groupId       String?
+  petName       String?
+  petBreed      String?
+  content       String
+  images        String[]
+  likesCount    Int      @default(0)
+  commentsCount Int      @default(0)
+  reported      Boolean  @default(false)
+  hiddenAt      DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  author   User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  group    Group?        @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  comments PostComment[]
+  likes    PostLike[]
+
+  @@index([authorId])
+  @@index([groupId])
+  @@index([createdAt])
+  @@map("posts")
+}
+
+model PostComment {
+  id        String   @id @default(cuid())
+  postId    String
+  authorId  String
+  content   String
+  reported  Boolean  @default(false)
+  hiddenAt  DateTime?
+  createdAt DateTime @default(now())
+
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@map("post_comments")
+}
+
+model PostLike {
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([userId, postId])
+  @@index([postId])
+  @@map("post_likes")
+}
+
+model Report {
+  id          String            @id @default(cuid())
+  reporterId  String
+  targetType  ReportTargetType
+  targetId    String
+  reason      String
+  status      ReportStatus      @default(OPEN)
+  createdAt   DateTime          @default(now())
+  reviewedAt  DateTime?
+
+  reporter User @relation("ReportsMade", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([targetType, targetId])
+  @@map("reports")
+}
+
+model UserBlock {
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+
+  blocker User @relation("BlocksMade", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked User @relation("BlocksReceived", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@id([blockerId, blockedId])
+  @@index([blockedId])
+  @@map("user_blocks")
+}
+
+model DeviceToken {
+  id        String         @id @default(cuid())
+  userId    String
+  platform  DevicePlatform
+  token     String         @unique
+  createdAt DateTime       @default(now())
+  lastSeen  DateTime       @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("device_tokens")
+}
+
+model PushSent {
+  id         String   @id @default(cuid())
+  userId     String
+  resourceId String
+  resourceType String
+  dueDate    DateTime
+  sentAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, resourceId, resourceType, dueDate])
+  @@index([userId])
+  @@map("push_sent")
+}

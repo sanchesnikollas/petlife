@@ -1,0 +1,35 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Capacitor native (generated — rebuild with `npx cap add`)
+ios/
+android/
+
+# Vite cache
+.vite/
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.sw?
+
+# Claude
+.claude/settings.json
+
+# Git backup
+.git.bak/
